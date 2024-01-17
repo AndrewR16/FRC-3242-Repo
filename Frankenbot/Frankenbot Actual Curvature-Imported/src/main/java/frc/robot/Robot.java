@@ -14,7 +14,6 @@ import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
 /**
@@ -31,12 +30,12 @@ public class Robot extends TimedRobot {
   //Motors
   private final WPI_TalonSRX m_leftfrontdrive = new WPI_TalonSRX(2);
   private final WPI_TalonSRX m_leftbackdrive = new WPI_TalonSRX(0);
-  private final MotorController m_left = new MotorControllerGroup(m_leftfrontdrive, m_leftbackdrive);
+  // private final MotorController m_left = new MotorControllerGroup(m_leftfrontdrive, m_leftbackdrive);
 
   private final WPI_TalonSRX m_rightfrontdrive = new WPI_TalonSRX(3);
   private final WPI_TalonSRX m_rightbackdrive = new WPI_TalonSRX(1);
   
-  private final MotorController m_right = new MotorControllerGroup(m_rightfrontdrive, m_rightbackdrive);
+  // private final MotorController m_right = new MotorControllerGroup(m_rightfrontdrive, m_rightbackdrive);
   private final DifferentialDrive m_drive = new DifferentialDrive(m_left, m_right);
 
   WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_leftfrontdrive);
