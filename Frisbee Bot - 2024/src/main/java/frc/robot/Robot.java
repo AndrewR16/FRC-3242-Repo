@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.XboxController; // Control
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Drive
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
-// import frc.robot.Speed;
+import frc.robot.Speed;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,7 +29,6 @@ public class Robot extends TimedRobot {
   private final WPI_TalonSRX m_backRightDrive = new WPI_TalonSRX(1);
 
   // Drive Control
-  // TODO: Update differential drive to work without motor controller groups; create custom function
   private final DifferentialDrive m_arcadeDrive = new DifferentialDrive(m_frontLeftDrive, m_frontRightDrive);
   private final MecanumDrive m_mecanumDrive = new MecanumDrive(m_frontLeftDrive, m_backLeftDrive, m_frontRightDrive,
       m_backRightDrive);
@@ -64,8 +63,6 @@ public class Robot extends TimedRobot {
     toggleMotorDirections();
   }
 
-  
-
   @Override
   public void robotPeriodic() {
   }
@@ -83,7 +80,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    if (m_timer.get() <= 3){
+    if (m_timer.get() <= 3) {
       m_frontLeftDrive.set(Speed.velocity);
       m_frontRightDrive.set(Speed.velocity);
     }
@@ -98,6 +95,8 @@ public class Robot extends TimedRobot {
   // Robot runs with input
   @Override
   public void teleopInit() {
+    m_backLeftDrive.follow(m_frontLeftDrive);
+    m_backRightDrive.follow(m_frontRightDrive);
   }
 
   @Override
@@ -134,8 +133,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-    m_frontLeftDrive.set(-Speed.velocity);
-    m_frontRightDrive.set(-Speed.velocity);
+    m_backLeftDrive.set(-Speed.velocity);
+    m_backRightDrive.set(-Speed.velocity);
   }
 
   @Override
