@@ -25,17 +25,17 @@ import edu.wpi.first.wpilibj.AnalogPotentiometer;
 public class Robot extends TimedRobot {
 
   // drivetrain motors
-  private final WPI_TalonSRX leftFront = new WPI_TalonSRX(0);
-  private final WPI_TalonSRX rightFront = new WPI_TalonSRX(5);
-  private final WPI_TalonSRX leftBack = new WPI_TalonSRX(4);
-  private final WPI_TalonSRX rightBack = new WPI_TalonSRX(3);
+  private final WPI_TalonSRX m_leftFront = new WPI_TalonSRX(0);
+  private final WPI_TalonSRX m_rightFront = new WPI_TalonSRX(5);
+  private final WPI_TalonSRX m_leftBack = new WPI_TalonSRX(4);
+  private final WPI_TalonSRX m_rightBack = new WPI_TalonSRX(3);
   // crane motors
   private final WPI_TalonSRX lift = new WPI_TalonSRX(2);
   private final WPI_TalonSRX extend = new WPI_TalonSRX(1);
   private final WPI_VictorSPX tilt = new WPI_VictorSPX(7);
 
   // drivetrain
-  private final DifferentialDrive m_drive = new DifferentialDrive(m_left, m_right);
+  private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
   // xbox controller
   private final XboxController driverInput = new XboxController(0);
   // numatics
@@ -69,8 +69,8 @@ public class Robot extends TimedRobot {
     chooser.addOption("Blue 1", kBlue1);
     chooser.addOption("Blue 2", kBlue2);
     SmartDashboard.putData("Auto Choices", chooser);
-    leftFront.setInverted(true);
-    leftBack.setInverted(true);
+    m_leftFront.setInverted(true);
+    m_leftBack.setInverted(true);
     tilt.setInverted(true);
     tiltEncoder.setDistancePerPulse(4.0 / 256);
     
@@ -128,6 +128,8 @@ public class Robot extends TimedRobot {
     extend.setInverted(false);
     extend.setSensorPhase(false);
 
+    m_leftBack.follow(m_leftFront);
+    m_rightBack.follow(m_rightFront);
   }
 
   @Override
@@ -194,10 +196,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-    leftFront.set(0.3);
-    leftBack.set(0.3);
-    rightFront.set(0.3);
-    rightBack.set(0.3);
+    m_leftFront.set(0.3);
+    m_leftBack.set(0.3);
+    m_rightFront.set(0.3);
+    m_rightBack.set(0.3);
      extend.set(0.3);
     // lift.set(0.3);
     
