@@ -12,7 +12,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Encoder;
@@ -36,8 +35,6 @@ public class Robot extends TimedRobot {
   private final WPI_VictorSPX tilt = new WPI_VictorSPX(7);
 
   // drivetrain
-  MotorControllerGroup m_left = new MotorControllerGroup(leftFront, leftBack);
-  MotorControllerGroup m_right = new MotorControllerGroup(rightFront, rightBack);
   private final DifferentialDrive m_drive = new DifferentialDrive(m_left, m_right);
   // xbox controller
   private final XboxController driverInput = new XboxController(0);
