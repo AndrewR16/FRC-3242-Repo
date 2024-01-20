@@ -29,6 +29,7 @@ public class Robot extends TimedRobot {
   private final WPI_TalonSRX m_rightFront = new WPI_TalonSRX(5);
   private final WPI_TalonSRX m_leftBack = new WPI_TalonSRX(4);
   private final WPI_TalonSRX m_rightBack = new WPI_TalonSRX(3);
+
   // crane motors
   private final WPI_TalonSRX lift = new WPI_TalonSRX(2);
   private final WPI_TalonSRX extend = new WPI_TalonSRX(1);
@@ -36,88 +37,88 @@ public class Robot extends TimedRobot {
 
   // drivetrain
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
+
   // xbox controller
   private final XboxController driverInput = new XboxController(0);
+
   // numatics
   private final DoubleSolenoid grabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
   // Encoder
- //  private final Encoder extendEncoder = new Encoder(null, null);
+  // private final Encoder extendEncoder = new Encoder(null, null);
   private final Encoder tiltEncoder = new Encoder(0, 1);
   Faults extendFault = new Faults();
   // Pigeon gyro
- // WPI_PigeonIMU gyro = new WPI_PigeonIMU(rightBack);
+  // WPI_PigeonIMU gyro = new WPI_PigeonIMU(rightBack);
   // auto chooser
   private static final String kBlue1 = "Blue 1";
   private static final String kBlue2 = "Blue 2";
   private static final String kRed1 = "Red 1";
   private static final String kRed2 = "Red 2";
-  private String m_autoSelected;
   private final SendableChooser<String> chooser = new SendableChooser<>();
+
   // Analog Potentiometer
   AnalogPotentiometer pot = new AnalogPotentiometer(0, 145, 30);
+
   // levels of Tilt
   double tiltAngle = 0.0;
-  //Led
+
+  // Led
   Spark ledSpark = new Spark(0);
   LED led = new LED(ledSpark);
+
+  // *Smart Dashboard
+  private static int counter = 0;
+  private static final String kDefaultAuto = "Counter Up";
+  private static final String kCustomAuto = "Counter Down";
+  private String m_autoSelected;
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
   @Override
   public void robotInit() {
-
-    chooser.setDefaultOption("Red 1", kRed1);
-    chooser.addOption("Red 2", kRed2);
-    chooser.addOption("Blue 1", kBlue1);
-    chooser.addOption("Blue 2", kBlue2);
-    SmartDashboard.putData("Auto Choices", chooser);
-    m_leftFront.setInverted(true);
-    m_leftBack.setInverted(true);
-    tilt.setInverted(true);
-    tiltEncoder.setDistancePerPulse(4.0 / 256);
-    
+    m_chooser.setDefaultOption("Counter Up", kDefaultAuto);
+    m_chooser.addOption("Counter Down", kCustomAuto);
+    SmartDashboard.putData("Auto Choices", m_chooser);
   }
 
-  
   @Override
   public void robotPeriodic() {
 
     // System.out.println("Encoder" + extendEncoder.get());
     // System.out.println("Tilt " + tiltEncoder.getDistance());
     // SmartDashboard.putNumber("extednencoder",extendEncoder.get());
-    SmartDashboard.putNumber("tiltencoder", tiltEncoder.getDistance());
 
-//    SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-//    SmartDashboard.putNumber("Turn rate", gyro.getRate());
-   // SmartDashboard.putNumber("Pitch+", gyro.getPitch());
-    SmartDashboard.putNumber("Pot", pot.get());
-    SmartDashboard.putNumber("tilt angle", tiltAngle);
-    SmartDashboard.putNumber("Sensor Vel:", extend.getSelectedSensorVelocity());
-    SmartDashboard.putNumber("Sensor Pos:", extend.getSelectedSensorPosition());
-    SmartDashboard.putNumber("Out %", extend.getMotorOutputPercent());
-    SmartDashboard.putBoolean("Out of Phase:", extendFault.SensorOutOfPhase);
+    // SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+    // SmartDashboard.putNumber("Turn rate", gyro.getRate());
+    // SmartDashboard.putNumber("Pitch+", gyro.getPitch());
+    // *SmartDashboard.putNumber("tiltencoder", tiltEncoder.getDistance());
+    // *SmartDashboard.putNumber("Pot", pot.get());
+    // *SmartDashboard.putNumber("tilt angle", tiltAngle);
+    // *SmartDashboard.putNumber("Sensor Vel:", extend.getSelectedSensorVelocity());
+    // *SmartDashboard.putNumber("Sensor Pos:", extend.getSelectedSensorPosition());
+    // *SmartDashboard.putNumber("Out %", extend.getMotorOutputPercent());
+    // *SmartDashboard.putBoolean("Out of Phase:", extendFault.SensorOutOfPhase);
 
   }
 
   @Override
   public void autonomousInit() {
-
-    m_autoSelected = chooser.getSelected();
+    m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
+  /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
+    SmartDashboard.putNumber("Counter", counter--);
+
     switch (m_autoSelected) {
-      case kRed1:
-
+      case kCustomAuto:
+        counter--;
         break;
-      case kRed2:
-
-        break;
-      case kBlue1:
-
-        break;
-      case kBlue2:
-
+      case kDefaultAuto:
+      default:
+        counter++;
         break;
     }
   }
@@ -155,20 +156,19 @@ public class Robot extends TimedRobot {
       grabber.set(Value.kReverse);
     }
     if (driverInput.getPOV() == 0) {
-      tiltAngle = tiltAngle +0.05;
+      tiltAngle = tiltAngle + 0.05;
     }
     if (driverInput.getPOV() == 180) {
       tiltAngle = tiltAngle - 0.05;
     }
-//tilt
-    tilt.set(tiltAngle/2);
-    
-  //lift makes sure it doesn't go past
-    if(pot.get() < 120 || 
-    driverInput.getRightY() > 0){
-    lift.set(driverInput.getRightY());
-    }
-    else{
+    // tilt
+    tilt.set(tiltAngle / 2);
+
+    // lift makes sure it doesn't go past
+    if (pot.get() < 120 ||
+        driverInput.getRightY() > 0) {
+      lift.set(driverInput.getRightY());
+    } else {
       lift.set(0.0);
     }
     if (driverInput.getYButtonPressed() == true) {
@@ -178,7 +178,7 @@ public class Robot extends TimedRobot {
     if (driverInput.getRightTriggerAxis() > 0.1) {
       tilt.set(0.0);
       extend.getFaults(extendFault);
-    
+
     }
   }
 
@@ -200,9 +200,9 @@ public class Robot extends TimedRobot {
     m_leftBack.set(0.3);
     m_rightFront.set(0.3);
     m_rightBack.set(0.3);
-     extend.set(0.3);
+    extend.set(0.3);
     // lift.set(0.3);
-    
+
   }
 
   @Override
