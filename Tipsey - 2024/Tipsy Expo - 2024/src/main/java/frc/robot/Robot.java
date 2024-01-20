@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // SmartDashboard
 import edu.wpi.first.wpilibj.TimedRobot; // Structure
 import com.ctre.phoenix.motorcontrol.Faults;
@@ -64,9 +65,16 @@ public class Robot extends TimedRobot {
   double tiltAngle = 0.0;
 
   // Speed Variables
-  private static double defaultSpeed = 0.2;
+  private static double defaultSpeed = -0.5;
   private static double backwards = -1.0;
   private static double stopSpeed = 0.0;
+
+  // *Smart Dashboard
+  private static int counter = 0;
+  private static final String kDefaultAuto = "Test Left";
+  private static final String kCustomAuto = "Test Right";
+  private String m_autoSelected;
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -75,6 +83,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    // Back motors follow front
+    m_leftBack.follow(m_leftFront);
+    m_rightBack.follow(m_rightFront);
+
+    // Invert right side motors
+    m_rightFront.setInverted(true);
+    m_chooser.setDefaultOption("Test Left", kDefaultAuto);
+    m_chooser.addOption("Test Right", kCustomAuto);
+    SmartDashboard.putData("Auto Choices", m_chooser);
   }
 
   @Override
@@ -86,19 +103,35 @@ public class Robot extends TimedRobot {
     // resets timer and starts it again
     timer.reset();
     timer.start();
-
-    m_leftBack.follow(m_leftFront);
-    m_rightBack.follow(m_rightFront);
   }
 
   @Override
   public void autonomousPeriodic() {
-    if (timer.get() < 2) {
-      m_leftFront.set(defaultSpeed);
-      m_rightFront.set(defaultSpeed);
-    } else if (timer.get() == 2) {
-      m_leftFront.set(stopSpeed);
-      m_rightFront.set(stopSpeed);
+    switch (m_autoSelected) {
+      // Testing the Right Side
+      case kCustomAuto:
+        if (timer.get() < 2) {
+          // Slow down the right side
+          m_leftFront.set(defaultSpeed);
+          m_rightFront.set(defaultSpeed  * 0.7);
+        }else if (timer.get() == 2) {
+          m_leftFront.set(stopSpeed);
+          m_rightFront.set(stopSpeed);
+        }
+        break;
+
+      // Testing the Left Side
+      case kDefaultAuto:
+      default:
+        if (timer.get() < 2) {
+          // Slow down the left side
+          m_leftFront.set(defaultSpeed * 0.7);
+          m_rightFront.set(defaultSpeed);
+        } else if (timer.get() == 2) {
+          m_leftFront.set(stopSpeed);
+          m_rightFront.set(stopSpeed);
+        }
+        break;
     }
   }
 
@@ -108,6 +141,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    m_drive.arcadeDrive(driverInput.getLeftY(), driverInput.getLeftX());
   }
 
   @Override
