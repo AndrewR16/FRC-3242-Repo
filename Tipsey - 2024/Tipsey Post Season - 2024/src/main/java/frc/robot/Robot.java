@@ -1,6 +1,4 @@
 // Copyright (c) FIRST and other WPILib contributors.
-// TODO: Update motor controller groups to use the .follow() method instead
-
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
