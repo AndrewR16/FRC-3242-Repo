@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
+// Copyright (c) FIRST and other WPILib contributors. 
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> chooser = new SendableChooser<>();
 
   // Analog Potentiometer
-  AnalogPotentiometer pot = new AnalogPotentiometer(0, 145, 30);
+  AnalogPotentiometer potentiometer = new AnalogPotentiometer(0, 145, 30);
 
   // levels of Tilt
   double tiltAngle = 0.0;
@@ -163,7 +163,7 @@ public class Robot extends TimedRobot {
     tilt.set(tiltAngle / 2);
 
     // lift makes sure it doesn't go past
-    if (pot.get() < 120 ||
+    if (potentiometer.get() < 120 ||
         driverInput.getRightY() > 0) {
       lift.set(driverInput.getRightY());
     } else {
