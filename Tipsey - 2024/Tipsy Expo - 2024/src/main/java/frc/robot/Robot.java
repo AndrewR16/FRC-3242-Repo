@@ -15,6 +15,7 @@ import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.XboxController; // Control
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
 import edu.wpi.first.wpilibj.drive.MecanumDrive; // Mecanum Drive
@@ -51,7 +52,7 @@ public class Robot extends TimedRobot {
   private final XboxController driverInput = new XboxController(0);
 
   // numatics
-  private final DoubleSolenoid grabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
+  private final DoubleSolenoid m_grabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
   // Encoder
   // *private final Encoder extendEncoder = new Encoder(null, null);
@@ -113,8 +114,8 @@ public class Robot extends TimedRobot {
         if (timer.get() < 2) {
           // Slow down the right side
           m_leftFront.set(defaultSpeed);
-          m_rightFront.set(defaultSpeed  * 0.7);
-        }else if (timer.get() == 2) {
+          m_rightFront.set(defaultSpeed * 0.7);
+        } else if (timer.get() == 2) {
           m_leftFront.set(stopSpeed);
           m_rightFront.set(stopSpeed);
         }
@@ -142,6 +143,39 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     m_drive.arcadeDrive(driverInput.getLeftY(), driverInput.getLeftX());
+
+    // grabber
+    if (driverInput.getLeftBumperPressed()) {
+      m_grabber.set(Value.kForward);
+    }
+    if (driverInput.getRightBumperPressed()) {
+      m_grabber.set(Value.kReverse);
+    }
+    if (driverInput.getPOV() == 0) {
+      tiltAngle = tiltAngle + 0.05;
+    }
+    if (driverInput.getPOV() == 180) {
+      tiltAngle = tiltAngle - 0.05;
+    }
+    // tilt
+    m_tilt.set(tiltAngle / 2);
+
+    // lift makes sure it doesn't go past
+    if (potentiometer.get() < 120 ||
+        driverInput.getRightY() > 0) {
+      m_lift.set(driverInput.getRightY());
+    } else {
+      m_lift.set(0.0);
+    }
+    if (driverInput.getYButtonPressed() == true) {
+      tiltAngle = 0.8;
+
+    }
+    if (driverInput.getRightTriggerAxis() > 0.1) {
+      m_tilt.set(0.0);
+      m_extend.getFaults(extendFault);
+
+    }
   }
 
   @Override
