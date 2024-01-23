@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax;
 import frc.robot.LED;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 
