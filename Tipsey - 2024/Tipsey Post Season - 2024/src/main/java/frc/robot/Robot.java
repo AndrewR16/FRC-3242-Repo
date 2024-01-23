@@ -74,6 +74,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    led.rainbow();
+    
     m_chooser.setDefaultOption("Counter Up", kDefaultAuto);
     m_chooser.addOption("Counter Down", kCustomAuto);
     SmartDashboard.putData("Auto Choices", m_chooser);
