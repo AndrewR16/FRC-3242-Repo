@@ -30,8 +30,8 @@ public class Robot extends TimedRobot {
 
   // crane motors
   private final WPI_TalonSRX lift = new WPI_TalonSRX(2);
-  private final WPI_TalonSRX extend = new WPI_TalonSRX(1);
-  private final WPI_VictorSPX tilt = new WPI_VictorSPX(7);
+  private final WPI_TalonSRX tilt = new WPI_TalonSRX(1);
+  private final WPI_VictorSPX extend = new WPI_VictorSPX(7);
 
   // drivetrain
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
@@ -125,9 +125,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    extend.configFactoryDefault();
-    extend.setInverted(false);
-    extend.setSensorPhase(false);
+    tilt.configFactoryDefault();
+    tilt.setInverted(false);
+    tilt.setSensorPhase(false);
 
     m_leftBack.follow(m_leftFront);
     m_rightBack.follow(m_rightFront);
@@ -139,14 +139,14 @@ public class Robot extends TimedRobot {
     // drivetrain
     m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
     // extensions
-    if (driverInput.getAButtonPressed()) {
-      extend.set(4.25f);
-    }
-    if (driverInput.getAButtonReleased() || driverInput.getBButtonReleased()) {
-      extend.set(0.0);
-    }
     if (driverInput.getBButtonPressed()) {
-      extend.set(-0.3);
+      tilt.set(0.6);
+    }
+    if (driverInput.getBButtonReleased() || driverInput.getBButtonReleased()) {
+      tilt.set(0.0);
+    }
+    if (driverInput.getAButtonPressed()) {
+      tilt.set(-0.3);
     }
     // grabber
     if (driverInput.getLeftBumperPressed()) {
@@ -162,7 +162,7 @@ public class Robot extends TimedRobot {
       tiltAngle = tiltAngle - 0.05;
     }
     // tilt
-    tilt.set(tiltAngle / 2);
+    extend.set(tiltAngle / 2);
 
     // lift makes sure it doesn't go past
     if (potentiometer.get() < 120 ||
@@ -176,8 +176,8 @@ public class Robot extends TimedRobot {
 
     }
     if (driverInput.getRightTriggerAxis() > 0.1) {
-      tilt.set(0.0);
-      extend.getFaults(extendFault);
+      extend.set(0.0);
+      tilt.getFaults(extendFault);
 
     }
   }
@@ -200,7 +200,7 @@ public class Robot extends TimedRobot {
     m_leftBack.set(0.3);
     m_rightFront.set(0.3);
     m_rightBack.set(0.3);
-    extend.set(0.3);
+    tilt.set(0.3);
     // lift.set(0.3);
 
   }
