@@ -54,6 +54,10 @@ public class Robot extends TimedRobot {
   // numatics
   private final DoubleSolenoid m_grabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
+  // grabber values
+  private final DoubleSolenoid.Value grabberOpen = Value.kReverse;
+  private final DoubleSolenoid.Value grabberClose = Value.kForward;
+
   // Encoder
   // *private final Encoder extendEncoder = new Encoder(null, null);
   private final Encoder tiltEncoder = new Encoder(0, 1);
@@ -66,8 +70,8 @@ public class Robot extends TimedRobot {
   double tiltAngle = 0.0;
 
   // Speed Variables
-  private static double defaultSpeed = -0.5;
-  private static double backwards = -1.0;
+  private static double defaultSpeed = -0.4;
+  private static double turnSpeed = -0.4;
   private static double stopSpeed = 0.0;
 
   // *Smart Dashboard
@@ -90,6 +94,7 @@ public class Robot extends TimedRobot {
 
     // Invert right side motors
     m_rightFront.setInverted(true);
+    m_rightBack.setInverted(true);
     m_chooser.setDefaultOption("Test Left", kDefaultAuto);
     m_chooser.addOption("Test Right", kCustomAuto);
     SmartDashboard.putData("Auto Choices", m_chooser);
@@ -108,31 +113,24 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      // Testing the Right Side
-      case kCustomAuto:
-        if (timer.get() < 2) {
-          // Slow down the right side
-          m_leftFront.set(defaultSpeed);
-          m_rightFront.set(defaultSpeed * 0.7);
-        } else if (timer.get() == 2) {
-          m_leftFront.set(stopSpeed);
-          m_rightFront.set(stopSpeed);
-        }
-        break;
+    double currentTime = timer.get();
 
-      // Testing the Left Side
-      case kDefaultAuto:
-      default:
-        if (timer.get() < 2) {
-          // Slow down the left side
-          m_leftFront.set(defaultSpeed * 0.7);
-          m_rightFront.set(defaultSpeed);
-        } else if (timer.get() == 2) {
-          m_leftFront.set(stopSpeed);
-          m_rightFront.set(stopSpeed);
-        }
-        break;
+    // TODO: Events
+
+    if (currentTime < 0.5) {
+      m_grabber.set(grabberOpen);
+    } else if (currentTime > 0.5 && currentTime < 2.5) {
+      m_rightFront.set(defaultSpeed);
+      m_leftFront.set(defaultSpeed);
+    } else if (currentTime > 2.5 && currentTime < 3.0) {
+      m_grabber.set(grabberClose);
+    } else if (currentTime > 3.0 && currentTime < 3.5) {
+      m_lift.set(-1);
+    } else if (currentTime > 3.5 && currentTime < 3.6) {
+      m_lift.set(0);
+    } else if (currentTime > 3.6 && currentTime < 18.6) {
+      m_leftFront.set(turnSpeed);
+      m_rightFront.set(-turnSpeed);
     }
   }
 
@@ -146,10 +144,10 @@ public class Robot extends TimedRobot {
 
     // grabber
     if (driverInput.getRightBumperPressed()) {
-      if (m_grabber.get() == Value.kForward) {
-        m_grabber.set(Value.kReverse);
+      if (m_grabber.get() == grabberOpen) {
+        m_grabber.set(grabberClose);
       } else {
-        m_grabber.set(Value.kForward);
+        m_grabber.set(grabberOpen);
       }
     }
     if (driverInput.getPOV() == 0) {
@@ -160,16 +158,16 @@ public class Robot extends TimedRobot {
     }
 
     // Tilt
-    if (driverInput.getAButtonPressed()) {
+    if (driverInput.getYButtonPressed()) {
       m_tilt.set(0.6);
     }
-    if (driverInput.getYButtonPressed()) {
+    if (driverInput.getAButtonPressed()) {
       m_tilt.set(-0.3);
     }
     if (driverInput.getAButtonReleased() || driverInput.getYButtonReleased()) {
       m_tilt.set(0.0);
     }
-    
+
     // Extend
     m_extend.set(tiltAngle / 2);
 
@@ -201,10 +199,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    m_leftBack.follow(m_leftFront);
+    m_rightBack.follow(m_rightFront);
   }
 
   @Override
   public void testPeriodic() {
+    m_leftFront.set(turnSpeed);
+    m_rightFront.set(-turnSpeed);
   }
 
   @Override

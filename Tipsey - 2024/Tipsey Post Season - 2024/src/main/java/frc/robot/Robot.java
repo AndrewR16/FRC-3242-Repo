@@ -138,7 +138,7 @@ public class Robot extends TimedRobot {
     led.lawnGreen();
     // drivetrain
     m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
-    // extensions
+    // tilt
     if (driverInput.getBButtonPressed()) {
       tilt.set(0.6);
     }
