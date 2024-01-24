@@ -42,8 +42,8 @@ public class Robot extends TimedRobot {
 
   // crane motors
   private final WPI_TalonSRX m_lift = new WPI_TalonSRX(2);
-  private final WPI_TalonSRX m_extend = new WPI_TalonSRX(1);
-  private final WPI_VictorSPX m_tilt = new WPI_VictorSPX(7);
+  private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
+  private final WPI_VictorSPX m_extend = new WPI_VictorSPX(7);
 
   // drivetrain
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
@@ -145,11 +145,12 @@ public class Robot extends TimedRobot {
     m_drive.arcadeDrive(driverInput.getLeftY(), driverInput.getLeftX());
 
     // grabber
-    if (driverInput.getLeftBumperPressed()) {
-      m_grabber.set(Value.kForward);
-    }
     if (driverInput.getRightBumperPressed()) {
-      m_grabber.set(Value.kReverse);
+      if (m_grabber.get() == Value.kForward) {
+        m_grabber.set(Value.kReverse);
+      } else {
+        m_grabber.set(Value.kForward);
+      }
     }
     if (driverInput.getPOV() == 0) {
       tiltAngle = tiltAngle + 0.05;
@@ -157,8 +158,20 @@ public class Robot extends TimedRobot {
     if (driverInput.getPOV() == 180) {
       tiltAngle = tiltAngle - 0.05;
     }
-    // tilt
-    m_tilt.set(tiltAngle / 2);
+
+    // Tilt
+    if (driverInput.getAButtonPressed()) {
+      m_tilt.set(0.6);
+    }
+    if (driverInput.getYButtonPressed()) {
+      m_tilt.set(-0.3);
+    }
+    if (driverInput.getAButtonReleased() || driverInput.getYButtonReleased()) {
+      m_tilt.set(0.0);
+    }
+    
+    // Extend
+    m_extend.set(tiltAngle / 2);
 
     // lift makes sure it doesn't go past
     if (potentiometer.get() < 120 ||
@@ -172,8 +185,8 @@ public class Robot extends TimedRobot {
 
     }
     if (driverInput.getRightTriggerAxis() > 0.1) {
-      m_tilt.set(0.0);
-      m_extend.getFaults(extendFault);
+      m_extend.set(0.0);
+      m_tilt.getFaults(extendFault);
 
     }
   }
