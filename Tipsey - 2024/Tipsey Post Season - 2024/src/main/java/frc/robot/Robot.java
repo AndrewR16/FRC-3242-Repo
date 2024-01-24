@@ -42,11 +42,11 @@ public class Robot extends TimedRobot {
   private final DoubleSolenoid grabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
   // Encoder
- //  private final Encoder extendEncoder = new Encoder(null, null);
+  // private final Encoder extendEncoder = new Encoder(null, null);
   private final Encoder tiltEncoder = new Encoder(0, 1);
   Faults extendFault = new Faults();
   // Pigeon gyro
- // WPI_PigeonIMU gyro = new WPI_PigeonIMU(rightBack);
+  // WPI_PigeonIMU gyro = new WPI_PigeonIMU(rightBack);
   // auto chooser
   private static final String kBlue1 = "Blue 1";
   private static final String kBlue2 = "Blue 2";
@@ -55,12 +55,13 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> chooser = new SendableChooser<>();
   // Analog Potentiometer
-  AnalogPotentiometer pot = new AnalogPotentiometer(0, 145, 30);
+  AnalogPotentiometer potentiometer = new AnalogPotentiometer(0, 145, 30);
   // levels of Tilt
   double tiltAngle = 0.0;
-  //Led
+  // Led
   Spark ledSpark = new Spark(0);
   LED led = new LED(ledSpark);
+
   @Override
   public void robotInit() {
 
@@ -73,10 +74,9 @@ public class Robot extends TimedRobot {
     m_leftBack.setInverted(true);
     tilt.setInverted(true);
     tiltEncoder.setDistancePerPulse(4.0 / 256);
-    
+
   }
 
-  
   @Override
   public void robotPeriodic() {
 
@@ -85,10 +85,10 @@ public class Robot extends TimedRobot {
     // SmartDashboard.putNumber("extednencoder",extendEncoder.get());
     SmartDashboard.putNumber("tiltencoder", tiltEncoder.getDistance());
 
-//    SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-//    SmartDashboard.putNumber("Turn rate", gyro.getRate());
-   // SmartDashboard.putNumber("Pitch+", gyro.getPitch());
-    SmartDashboard.putNumber("Pot", pot.get());
+    // SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+    // SmartDashboard.putNumber("Turn rate", gyro.getRate());
+    // SmartDashboard.putNumber("Pitch+", gyro.getPitch());
+    SmartDashboard.putNumber("Pot", potentiometer.get());
     SmartDashboard.putNumber("tilt angle", tiltAngle);
     SmartDashboard.putNumber("Sensor Vel:", extend.getSelectedSensorVelocity());
     SmartDashboard.putNumber("Sensor Pos:", extend.getSelectedSensorPosition());
@@ -155,20 +155,19 @@ public class Robot extends TimedRobot {
       grabber.set(Value.kReverse);
     }
     if (driverInput.getPOV() == 0) {
-      tiltAngle = tiltAngle +0.05;
+      tiltAngle = tiltAngle + 0.05;
     }
     if (driverInput.getPOV() == 180) {
       tiltAngle = tiltAngle - 0.05;
     }
-//tilt
-    tilt.set(tiltAngle/2);
-    
-  //lift makes sure it doesn't go past
-    if(pot.get() < 120 || 
-    driverInput.getRightY() > 0){
-    lift.set(driverInput.getRightY());
-    }
-    else{
+    // tilt
+    tilt.set(tiltAngle / 2);
+
+    // lift makes sure it doesn't go past
+    if (potentiometer.get() < 120 ||
+        driverInput.getRightY() > 0) {
+      lift.set(driverInput.getRightY());
+    } else {
       lift.set(0.0);
     }
     if (driverInput.getYButtonPressed() == true) {
@@ -178,7 +177,7 @@ public class Robot extends TimedRobot {
     if (driverInput.getRightTriggerAxis() > 0.1) {
       tilt.set(0.0);
       extend.getFaults(extendFault);
-    
+
     }
   }
 
@@ -200,9 +199,9 @@ public class Robot extends TimedRobot {
     m_leftBack.set(0.3);
     m_rightFront.set(0.3);
     m_rightBack.set(0.3);
-     extend.set(0.3);
+    extend.set(0.3);
     // lift.set(0.3);
-    
+
   }
 
   @Override
