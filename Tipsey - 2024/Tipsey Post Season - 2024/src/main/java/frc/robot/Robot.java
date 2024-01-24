@@ -1,4 +1,6 @@
-// Copyright (c) FIRST and other WPILib contributors. 
+// Copyright (c) FIRST and other WPILib contributors.
+// TODO: Update motor controller groups to use the .follow() method instead
+
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -16,7 +18,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import com.revrobotics.CANSparkMax;
+//import com.revrobotics.CANSparkMax;
 import frc.robot.LED;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 
@@ -27,18 +29,15 @@ public class Robot extends TimedRobot {
   private final WPI_TalonSRX m_rightFront = new WPI_TalonSRX(5);
   private final WPI_TalonSRX m_leftBack = new WPI_TalonSRX(4);
   private final WPI_TalonSRX m_rightBack = new WPI_TalonSRX(3);
-
   // crane motors
   private final WPI_TalonSRX lift = new WPI_TalonSRX(2);
-  private final WPI_TalonSRX tilt = new WPI_TalonSRX(1);
-  private final WPI_VictorSPX extend = new WPI_VictorSPX(7);
+  private final WPI_TalonSRX extend = new WPI_TalonSRX(1);
+  private final WPI_VictorSPX tilt = new WPI_VictorSPX(7);
 
   // drivetrain
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
-
   // xbox controller
   private final XboxController driverInput = new XboxController(0);
-
   // numatics
   private final DoubleSolenoid grabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
@@ -53,32 +52,29 @@ public class Robot extends TimedRobot {
   private static final String kBlue2 = "Blue 2";
   private static final String kRed1 = "Red 1";
   private static final String kRed2 = "Red 2";
+  private String m_autoSelected;
   private final SendableChooser<String> chooser = new SendableChooser<>();
-
   // Analog Potentiometer
   AnalogPotentiometer potentiometer = new AnalogPotentiometer(0, 145, 30);
-
   // levels of Tilt
   double tiltAngle = 0.0;
-
   // Led
   Spark ledSpark = new Spark(0);
   LED led = new LED(ledSpark);
 
-  // *Smart Dashboard
-  private static int counter = 0;
-  private static final String kDefaultAuto = "Counter Up";
-  private static final String kCustomAuto = "Counter Down";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
-
   @Override
   public void robotInit() {
-    led.rainbow();
-    
-    m_chooser.setDefaultOption("Counter Up", kDefaultAuto);
-    m_chooser.addOption("Counter Down", kCustomAuto);
-    SmartDashboard.putData("Auto Choices", m_chooser);
+
+    chooser.setDefaultOption("Red 1", kRed1);
+    chooser.addOption("Red 2", kRed2);
+    chooser.addOption("Blue 1", kBlue1);
+    chooser.addOption("Blue 2", kBlue2);
+    SmartDashboard.putData("Auto Choices", chooser);
+    m_leftFront.setInverted(true);
+    m_leftBack.setInverted(true);
+    tilt.setInverted(true);
+    tiltEncoder.setDistancePerPulse(4.0 / 256);
+
   }
 
   @Override
@@ -87,47 +83,50 @@ public class Robot extends TimedRobot {
     // System.out.println("Encoder" + extendEncoder.get());
     // System.out.println("Tilt " + tiltEncoder.getDistance());
     // SmartDashboard.putNumber("extednencoder",extendEncoder.get());
+    SmartDashboard.putNumber("tiltencoder", tiltEncoder.getDistance());
 
     // SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
     // SmartDashboard.putNumber("Turn rate", gyro.getRate());
     // SmartDashboard.putNumber("Pitch+", gyro.getPitch());
-    // *SmartDashboard.putNumber("tiltencoder", tiltEncoder.getDistance());
-    // *SmartDashboard.putNumber("Pot", pot.get());
-    // *SmartDashboard.putNumber("tilt angle", tiltAngle);
-    // *SmartDashboard.putNumber("Sensor Vel:", extend.getSelectedSensorVelocity());
-    // *SmartDashboard.putNumber("Sensor Pos:", extend.getSelectedSensorPosition());
-    // *SmartDashboard.putNumber("Out %", extend.getMotorOutputPercent());
-    // *SmartDashboard.putBoolean("Out of Phase:", extendFault.SensorOutOfPhase);
+    SmartDashboard.putNumber("Pot", potentiometer.get());
+    SmartDashboard.putNumber("tilt angle", tiltAngle);
+    SmartDashboard.putNumber("Sensor Vel:", extend.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("Sensor Pos:", extend.getSelectedSensorPosition());
+    SmartDashboard.putNumber("Out %", extend.getMotorOutputPercent());
+    SmartDashboard.putBoolean("Out of Phase:", extendFault.SensorOutOfPhase);
 
   }
 
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
+
+    m_autoSelected = chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
-  /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putNumber("Counter", counter--);
-
     switch (m_autoSelected) {
-      case kCustomAuto:
-        counter--;
+      case kRed1:
+
         break;
-      case kDefaultAuto:
-      default:
-        counter++;
+      case kRed2:
+
+        break;
+      case kBlue1:
+
+        break;
+      case kBlue2:
+
         break;
     }
   }
 
   @Override
   public void teleopInit() {
-    tilt.configFactoryDefault();
-    tilt.setInverted(false);
-    tilt.setSensorPhase(false);
+    extend.configFactoryDefault();
+    extend.setInverted(false);
+    extend.setSensorPhase(false);
 
     m_leftBack.follow(m_leftFront);
     m_rightBack.follow(m_rightFront);
@@ -138,15 +137,15 @@ public class Robot extends TimedRobot {
     led.lawnGreen();
     // drivetrain
     m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
-    // tilt
-    if (driverInput.getBButtonPressed()) {
-      tilt.set(0.6);
-    }
-    if (driverInput.getBButtonReleased() || driverInput.getBButtonReleased()) {
-      tilt.set(0.0);
-    }
+    // extensions
     if (driverInput.getAButtonPressed()) {
-      tilt.set(-0.3);
+      extend.set(4.25f);
+    }
+    if (driverInput.getAButtonReleased() || driverInput.getBButtonReleased()) {
+      extend.set(0.0);
+    }
+    if (driverInput.getBButtonPressed()) {
+      extend.set(-0.3);
     }
     // grabber
     if (driverInput.getLeftBumperPressed()) {
@@ -162,7 +161,7 @@ public class Robot extends TimedRobot {
       tiltAngle = tiltAngle - 0.05;
     }
     // tilt
-    extend.set(tiltAngle / 2);
+    tilt.set(tiltAngle / 2);
 
     // lift makes sure it doesn't go past
     if (potentiometer.get() < 120 ||
@@ -176,8 +175,8 @@ public class Robot extends TimedRobot {
 
     }
     if (driverInput.getRightTriggerAxis() > 0.1) {
-      extend.set(0.0);
-      tilt.getFaults(extendFault);
+      tilt.set(0.0);
+      extend.getFaults(extendFault);
 
     }
   }
@@ -200,7 +199,7 @@ public class Robot extends TimedRobot {
     m_leftBack.set(0.3);
     m_rightFront.set(0.3);
     m_rightBack.set(0.3);
-    tilt.set(0.3);
+    extend.set(0.3);
     // lift.set(0.3);
 
   }
