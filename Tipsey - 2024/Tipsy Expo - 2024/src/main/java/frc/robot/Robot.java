@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.XboxController; // Control
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
+import static frc.robot.Command.*;
 // import edu.wpi.first.wpilibj.Encoder;
 
 /**
@@ -107,42 +108,42 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    resetValues();
+
     // resets timer and starts it again
     timer.reset();
     timer.start();
-
-    Command.resetValues();
   }
 
   @Override
   public void autonomousPeriodic() {
-    // SmartDashboard.putData(m_rightBack.get());
+    resetCommandId();
 
-    if (Command.runFor(0.5, 0)) {
+    if (runFor(0.5)) {
       m_grabber.set(grabberOpen);
-    } else if (Command.runFor(3, 1)) {
+    } else if (runFor(3)) {
       m_leftFront.set(defaultSpeed * 0.85);
       m_rightFront.set(defaultSpeed);
-    } else if (Command.runFor(0.5, 2)) {
+    } else if (runFor(0.5)) {
       m_leftFront.set(stopSpeed);
       m_rightFront.set(stopSpeed);
-    } else if (Command.runFor(0.5, 3)) {
+    } else if (runFor(1)) {
       m_grabber.set(grabberClose);
-    } else if (Command.runFor(1, 4)) {
+    } else if (runFor(1)) {
       m_lift.set(-1);
-    } else if (Command.runFor(0.1, 5)) {
+    } else if (runFor(0.1)) {
       m_lift.set(0);
-    } else if (Command.runFor(2, 6)) {
+    } else if (runFor(2)) {
       m_leftFront.set(-defaultSpeed);
       m_rightFront.set(-defaultSpeed);
-    } else if (Command.runFor(0.5, 7)) {
+    } else if (runFor(0.5)) {
       m_leftFront.set(0.0);
       m_rightFront.set(0.0);
-    } else if (Command.runFor(1, 8)) {
+    } else if (runFor(1)) {
       m_lift.set(1);
-    } else if (Command.runFor(0.1, 9)) {
+    } else if (runFor(0.1)) {
       m_lift.set(0);
-    } else if (Command.runFor(0.5, 10)) {
+    } else if (runFor(0.5)) {
       m_grabber.set(grabberOpen);
     }
   }

@@ -2,14 +2,23 @@ package frc.robot;
 
 public class Command {
     // Command variables
-    private static int currentCommandNumber = -1;
-    private static double endTime = 0.0;
+    private static int commandId;
+    private static int currentCommandNumber;
+    private static double endTime;
 
     /**
-     * Resets the values for command variables
+     * Implement at the start of periodic functions. Resets the values of commandId.
      */
-    public static void resetValues() {
+    protected static void resetCommandId() {
+        commandId = -1;
+    }
+    
+    /**
+     * Implement at the start of init functions. Resets the values for all command variables
+     */
+    protected static void resetValues() {
         currentCommandNumber = -1;
+        commandId = -1;
         endTime = 0.0;
     }
 
@@ -18,24 +27,24 @@ public class Command {
      * timer.get() values.
      * 
      * @param seconds Time for the command to run.
-     * @param cmdId   Unique identifier for the command.
      * 
      * @return Whether the current command should continue to run.
      */
-    public static boolean runFor(double seconds, int cmdId) {
+    protected static boolean runFor(double seconds) {
         double currentTime = Robot.timer.get();
+        commandId++;
 
         // Handle old and current commands
-        if (cmdId < currentCommandNumber) {
+        if (commandId < currentCommandNumber) {
             return false;
         }
-        if (cmdId == currentCommandNumber) {
+        if (commandId == currentCommandNumber) {
             return (endTime > currentTime);
         }
 
         // When a new command is recieved
-        if (cmdId > currentCommandNumber) {
-            currentCommandNumber = cmdId;
+        if (commandId > currentCommandNumber) {
+            currentCommandNumber++;
             endTime = currentTime + seconds;
 
             return true;
