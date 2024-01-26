@@ -70,8 +70,8 @@ public class Robot extends TimedRobot {
   double tiltAngle = 0.0;
 
   // Speed Variables
-  private static double defaultSpeed = -0.4;
-  private static double turnSpeed = -0.4;
+  private static double defaultSpeed = -0.5;
+  private static double turnSpeed = -0.6;
   private static double stopSpeed = 0.0;
 
   // *Smart Dashboard
@@ -80,6 +80,42 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "Test Right";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
+  // Command variables
+  private static int currentCommandNumber = -1;
+  private static double endTime = 0.0;
+
+  /**
+   * Allows commands to be run for a specified time rather than within a range of
+   * timer.get() values.
+   * 
+   * @param seconds Time for the command to run.
+   * @param cmdId   Unique identifier for the command.
+   * 
+   * @return Whether the current command should continue to run.
+   */
+  private boolean runFor(double seconds, int cmdId) {
+    double currentTime = timer.get();
+
+    // Handle old and current commands
+    if (cmdId < currentCommandNumber) {
+      return false;
+    }
+    if (cmdId == currentCommandNumber) {
+      return (endTime > currentTime);
+    }
+
+    // When a new command is recieved
+    if (cmdId > currentCommandNumber) {
+      currentCommandNumber = cmdId;
+      endTime = currentTime + seconds;
+
+      return true;
+    }
+
+    System.err.println("Command ID not recognized");
+    return false;
+  }
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -95,9 +131,11 @@ public class Robot extends TimedRobot {
     // Invert right side motors
     m_rightFront.setInverted(true);
     m_rightBack.setInverted(true);
-    m_chooser.setDefaultOption("Test Left", kDefaultAuto);
-    m_chooser.addOption("Test Right", kCustomAuto);
-    SmartDashboard.putData("Auto Choices", m_chooser);
+
+    // Smartdashboard
+    // m_chooser.setDefaultOption("Test Left", kDefaultAuto);
+    // m_chooser.addOption("Test Right", kCustomAuto);
+    // SmartDashboard.putData("Auto Choices", m_chooser);
   }
 
   @Override
@@ -109,28 +147,42 @@ public class Robot extends TimedRobot {
     // resets timer and starts it again
     timer.reset();
     timer.start();
+
+    // Command variables
+    currentCommandNumber = -1;
+    endTime = 0.0;
   }
 
   @Override
   public void autonomousPeriodic() {
-    double currentTime = timer.get();
+    // SmartDashboard.putData(m_rightBack.get());
 
-    // TODO: Events
-
-    if (currentTime < 0.5) {
+    if (runFor(0.5, 0)) {
       m_grabber.set(grabberOpen);
-    } else if (currentTime > 0.5 && currentTime < 2.5) {
+    } else if (runFor(3, 1)) {
+      m_leftFront.set(defaultSpeed * 0.85);
       m_rightFront.set(defaultSpeed);
-      m_leftFront.set(defaultSpeed);
-    } else if (currentTime > 2.5 && currentTime < 3.0) {
+    } else if (runFor(0.5, 2)) {
+      m_leftFront.set(0.0);
+      m_rightFront.set(0.0);
+    } else if (runFor(0.5, 3)) {
       m_grabber.set(grabberClose);
-    } else if (currentTime > 3.0 && currentTime < 3.5) {
+    } else if (runFor(1, 4)) {
       m_lift.set(-1);
-    } else if (currentTime > 3.5 && currentTime < 3.6) {
+    } else if (runFor(0.1, 5)) {
       m_lift.set(0);
-    } else if (currentTime > 3.6 && currentTime < 18.6) {
-      m_leftFront.set(turnSpeed);
-      m_rightFront.set(-turnSpeed);
+    } else if (runFor(2, 6)) {
+      m_leftFront.set(-defaultSpeed);
+      m_rightFront.set(-defaultSpeed);
+    } else if (runFor(0.5, 7)) {
+      m_leftFront.set(0.0);
+      m_rightFront.set(0.0);
+    } else if (runFor(1, 8)) {
+      m_lift.set(1);
+    } else if (runFor(0.1, 9)) {
+      m_lift.set(0);
+    } else if (runFor(0.5, 10)) {
+      m_grabber.set(grabberOpen);
     }
   }
 
@@ -205,8 +257,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-    m_leftFront.set(turnSpeed);
-    m_rightFront.set(-turnSpeed);
+    m_leftFront.set(defaultSpeed);
+    m_rightFront.set(-defaultSpeed);
   }
 
   @Override
