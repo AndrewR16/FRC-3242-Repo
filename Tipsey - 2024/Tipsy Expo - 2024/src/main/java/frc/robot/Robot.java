@@ -8,9 +8,8 @@ import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // SmartDashboard
-import edu.wpi.first.wpilibj.TimedRobot; // Structure
+// import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+// import edu.wpi.first.wpilibj.TimedRobot; // Structure
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
@@ -18,8 +17,7 @@ import edu.wpi.first.wpilibj.XboxController; // Control
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
-import edu.wpi.first.wpilibj.drive.MecanumDrive; // Mecanum Drive
-import edu.wpi.first.wpilibj.Encoder;
+// import edu.wpi.first.wpilibj.Encoder;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -32,7 +30,7 @@ import edu.wpi.first.wpilibj.Encoder;
  */
 public class Robot extends TimedRobot {
   // Timer
-  private final Timer timer = new Timer();
+  protected final static Timer timer = new Timer();
 
   // drivetrain motors
   private final WPI_TalonSRX m_leftFront = new WPI_TalonSRX(0);
@@ -60,7 +58,7 @@ public class Robot extends TimedRobot {
 
   // Encoder
   // *private final Encoder extendEncoder = new Encoder(null, null);
-  private final Encoder tiltEncoder = new Encoder(0, 1);
+  // private final Encoder tiltEncoder = new Encoder(0, 1);
   Faults extendFault = new Faults();
 
   // Analog Potentiometer
@@ -71,51 +69,16 @@ public class Robot extends TimedRobot {
 
   // Speed Variables
   private static double defaultSpeed = -0.5;
+  @SuppressWarnings("unused")
   private static double turnSpeed = -0.6;
   private static double stopSpeed = 0.0;
 
   // *Smart Dashboard
-  private static int counter = 0;
-  private static final String kDefaultAuto = "Test Left";
-  private static final String kCustomAuto = "Test Right";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
-
-  // Command variables
-  private static int currentCommandNumber = -1;
-  private static double endTime = 0.0;
-
-  /**
-   * Allows commands to be run for a specified time rather than within a range of
-   * timer.get() values.
-   * 
-   * @param seconds Time for the command to run.
-   * @param cmdId   Unique identifier for the command.
-   * 
-   * @return Whether the current command should continue to run.
-   */
-  private boolean runFor(double seconds, int cmdId) {
-    double currentTime = timer.get();
-
-    // Handle old and current commands
-    if (cmdId < currentCommandNumber) {
-      return false;
-    }
-    if (cmdId == currentCommandNumber) {
-      return (endTime > currentTime);
-    }
-
-    // When a new command is recieved
-    if (cmdId > currentCommandNumber) {
-      currentCommandNumber = cmdId;
-      endTime = currentTime + seconds;
-
-      return true;
-    }
-
-    System.err.println("Command ID not recognized");
-    return false;
-  }
+  // private static int counter = 0;
+  // private static final String kDefaultAuto = "Test Left";
+  // private static final String kCustomAuto = "Test Right";
+  // private String m_autoSelected;
+  // private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -148,40 +111,38 @@ public class Robot extends TimedRobot {
     timer.reset();
     timer.start();
 
-    // Command variables
-    currentCommandNumber = -1;
-    endTime = 0.0;
+    Command.resetValues();
   }
 
   @Override
   public void autonomousPeriodic() {
     // SmartDashboard.putData(m_rightBack.get());
 
-    if (runFor(0.5, 0)) {
+    if (Command.runFor(0.5, 0)) {
       m_grabber.set(grabberOpen);
-    } else if (runFor(3, 1)) {
+    } else if (Command.runFor(3, 1)) {
       m_leftFront.set(defaultSpeed * 0.85);
       m_rightFront.set(defaultSpeed);
-    } else if (runFor(0.5, 2)) {
-      m_leftFront.set(0.0);
-      m_rightFront.set(0.0);
-    } else if (runFor(0.5, 3)) {
+    } else if (Command.runFor(0.5, 2)) {
+      m_leftFront.set(stopSpeed);
+      m_rightFront.set(stopSpeed);
+    } else if (Command.runFor(0.5, 3)) {
       m_grabber.set(grabberClose);
-    } else if (runFor(1, 4)) {
+    } else if (Command.runFor(1, 4)) {
       m_lift.set(-1);
-    } else if (runFor(0.1, 5)) {
+    } else if (Command.runFor(0.1, 5)) {
       m_lift.set(0);
-    } else if (runFor(2, 6)) {
+    } else if (Command.runFor(2, 6)) {
       m_leftFront.set(-defaultSpeed);
       m_rightFront.set(-defaultSpeed);
-    } else if (runFor(0.5, 7)) {
+    } else if (Command.runFor(0.5, 7)) {
       m_leftFront.set(0.0);
       m_rightFront.set(0.0);
-    } else if (runFor(1, 8)) {
+    } else if (Command.runFor(1, 8)) {
       m_lift.set(1);
-    } else if (runFor(0.1, 9)) {
+    } else if (Command.runFor(0.1, 9)) {
       m_lift.set(0);
-    } else if (runFor(0.5, 10)) {
+    } else if (Command.runFor(0.5, 10)) {
       m_grabber.set(grabberOpen);
     }
   }
