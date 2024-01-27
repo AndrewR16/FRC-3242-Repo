@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 // import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-// import edu.wpi.first.wpilibj.TimedRobot; // Structure
+// *import edu.wpi.first.wpilibj.TimedRobot; // Structure
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
@@ -108,7 +108,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    resetValues();
+    // Command reset
+    resetCommandValues();
 
     // resets timer and starts it again
     timer.reset();
@@ -117,8 +118,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
+    // Id reset
     resetCommandId();
 
+    // open claw, drive forward, close claw, drive backward, open claw
     if (runFor(0.5)) {
       m_grabber.set(grabberOpen);
     } else if (runFor(3)) {

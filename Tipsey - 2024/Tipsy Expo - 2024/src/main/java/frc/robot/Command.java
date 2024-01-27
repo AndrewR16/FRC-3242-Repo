@@ -16,7 +16,7 @@ public class Command {
     /**
      * Implement at the start of init functions. Resets the values for all command variables
      */
-    protected static void resetValues() {
+    protected static void resetCommandValues() {
         currentCommandNumber = -1;
         commandId = -1;
         endTime = 0.0;
