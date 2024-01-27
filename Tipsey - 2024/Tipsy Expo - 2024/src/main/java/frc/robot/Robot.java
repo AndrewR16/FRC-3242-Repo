@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 // import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-// import edu.wpi.first.wpilibj.TimedRobot; // Structure
+import edu.wpi.first.wpilibj.TimedRobot; // Structure
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
