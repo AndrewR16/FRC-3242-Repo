@@ -14,11 +14,13 @@ import edu.wpi.first.wpilibj.TimedRobot; // Structure
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.wpilibj.XboxController; // Control
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
 import edu.wpi.first.wpilibj.drive.MecanumDrive; // Mecanum Drive
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.Encoder;
 
 /**
@@ -81,6 +83,9 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  //Gyroscopes
+  WPI_PigeonIMU gyro = new WPI_PigeonIMU(0);
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -98,6 +103,7 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Test Left", kDefaultAuto);
     m_chooser.addOption("Test Right", kCustomAuto);
     SmartDashboard.putData("Auto Choices", m_chooser);
+    Shuffleboard.getTab("Gyro").add(gyro);
   }
 
   @Override
