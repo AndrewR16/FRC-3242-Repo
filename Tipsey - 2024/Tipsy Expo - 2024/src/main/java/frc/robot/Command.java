@@ -1,10 +1,15 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public class Command {
     // Command variables
     private static int commandId;
     private static int currentCommandNumber;
     private static double endTime;
+
+    // Timer
+    private final static Timer timer = new Timer();
 
     /**
      * Implement at the start of periodic functions. Resets the values of commandId.
@@ -12,14 +17,20 @@ public class Command {
     protected static void resetCommandId() {
         commandId = -1;
     }
-    
+
     /**
-     * Implement at the start of init functions. Resets the values for all command variables
+     * Implement at the start of init functions. Resets the values for all command
+     * variables
      */
     protected static void resetCommandValues() {
+        // Reset command variables
         currentCommandNumber = -1;
         commandId = -1;
         endTime = 0.0;
+
+        // Resets timer and starts it again
+        timer.reset();
+        timer.start();
     }
 
     /**
@@ -31,7 +42,7 @@ public class Command {
      * @return Whether the current command should continue to run.
      */
     protected static boolean runFor(double seconds) {
-        double currentTime = Robot.timer.get();
+        double currentTime = timer.get();
         commandId++;
 
         // Handle old and current commands

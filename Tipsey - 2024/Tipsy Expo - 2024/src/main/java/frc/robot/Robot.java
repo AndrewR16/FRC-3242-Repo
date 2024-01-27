@@ -8,17 +8,15 @@ import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
-// import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-// *import edu.wpi.first.wpilibj.TimedRobot; // Structure
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.XboxController; // Control
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
 import static frc.robot.Command.*;
 // import edu.wpi.first.wpilibj.Encoder;
+// import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -30,9 +28,6 @@ import static frc.robot.Command.*;
  * project.
  */
 public class Robot extends TimedRobot {
-  // Timer
-  protected final static Timer timer = new Timer();
-
   // drivetrain motors
   private final WPI_TalonSRX m_leftFront = new WPI_TalonSRX(0);
   private final WPI_TalonSRX m_rightFront = new WPI_TalonSRX(5);
@@ -68,18 +63,18 @@ public class Robot extends TimedRobot {
   // levels of Tilt
   double tiltAngle = 0.0;
 
-  // Speed Variables
-  private static double defaultSpeed = -0.5;
-  @SuppressWarnings("unused")
-  private static double turnSpeed = -0.6;
-  private static double stopSpeed = 0.0;
-
   // *Smart Dashboard
   // private static int counter = 0;
   // private static final String kDefaultAuto = "Test Left";
   // private static final String kCustomAuto = "Test Right";
   // private String m_autoSelected;
   // private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
+  // Speed Variables
+  private static double defaultSpeed = -0.5;
+  @SuppressWarnings("unused")
+  private static double turnSpeed = -0.6;
+  private static double stopSpeed = 0.0;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -110,10 +105,6 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     // Command reset
     resetCommandValues();
-
-    // resets timer and starts it again
-    timer.reset();
-    timer.start();
   }
 
   @Override
