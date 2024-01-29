@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // SmartDashboard
-import edu.wpi.first.wpilibj.TimedRobot; // Structure
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj.XboxController; // Control
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
-import edu.wpi.first.wpilibj.drive.MecanumDrive; // Mecanum Drive
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.Encoder;
 
@@ -86,6 +84,9 @@ public class Robot extends TimedRobot {
   //Gyroscopes
   WPI_PigeonIMU gyro = new WPI_PigeonIMU(0);
 
+  //Gain for a simple P loop
+  double kP = 1;
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -120,24 +121,27 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     double currentTime = timer.get();
+    //Setpoint is 0 degrees
+    double error = -gyro.getRate();
 
-    // TODO: Events
+    //Supposedly this drives forwards continously at half speed, using the gyro to stabilize the heading
+    m_drive.tankDrive(.5 + kP * error, .5 - kP * error);
 
-    if (currentTime < 0.5) {
-      m_grabber.set(grabberOpen);
-    } else if (currentTime > 0.5 && currentTime < 2.5) {
-      m_rightFront.set(defaultSpeed);
-      m_leftFront.set(defaultSpeed);
-    } else if (currentTime > 2.5 && currentTime < 3.0) {
-      m_grabber.set(grabberClose);
-    } else if (currentTime > 3.0 && currentTime < 3.5) {
-      m_lift.set(-1);
-    } else if (currentTime > 3.5 && currentTime < 3.6) {
-      m_lift.set(0);
-    } else if (currentTime > 3.6 && currentTime < 18.6) {
-      m_leftFront.set(turnSpeed);
-      m_rightFront.set(-turnSpeed);
-    }
+    // if (currentTime < 0.5) {
+    //   m_grabber.set(grabberOpen);
+    // } else if (currentTime > 0.5 && currentTime < 2.5) {
+    //   m_rightFront.set(defaultSpeed);
+    //   m_leftFront.set(defaultSpeed);
+    // } else if (currentTime > 2.5 && currentTime < 3.0) {
+    //   m_grabber.set(grabberClose);
+    // } else if (currentTime > 3.0 && currentTime < 3.5) {
+    //   m_lift.set(-1);
+    // } else if (currentTime > 3.5 && currentTime < 3.6) {
+    //   m_lift.set(0);
+    // } else if (currentTime > 3.6 && currentTime < 18.6) {
+    //   m_leftFront.set(turnSpeed);
+    //   m_rightFront.set(-turnSpeed);
+    // }
   }
 
   @Override
