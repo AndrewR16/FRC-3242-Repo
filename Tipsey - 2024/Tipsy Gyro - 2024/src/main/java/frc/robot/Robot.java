@@ -5,21 +5,18 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // SmartDashboard
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.wpilibj.XboxController; // Control
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.Encoder;
 import static frc.robot.Command.*;
 
 /**
@@ -33,6 +30,7 @@ import static frc.robot.Command.*;
  */
 public class Robot extends TimedRobot {
   // Timer
+  @SuppressWarnings("unused")
   private final Timer timer = new Timer();
 
   // drivetrain motors
@@ -42,9 +40,9 @@ public class Robot extends TimedRobot {
   private final WPI_TalonSRX m_rightBack = new WPI_TalonSRX(3);
 
   // crane motors
-  private final WPI_TalonSRX m_lift = new WPI_TalonSRX(2);
-  private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
-  private final WPI_VictorSPX m_extend = new WPI_VictorSPX(7);
+  // private final WPI_TalonSRX m_lift = new WPI_TalonSRX(2);
+  // private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
+  // private final WPI_VictorSPX m_extend = new WPI_VictorSPX(7);
 
   // drivetrain
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
@@ -59,10 +57,13 @@ public class Robot extends TimedRobot {
   private final DoubleSolenoid.Value grabberOpen = Value.kReverse;
   private final DoubleSolenoid.Value grabberClose = Value.kForward;
 
-  // Encoder
-  // *private final Encoder extendEncoder = new Encoder(null, null);
-  private final Encoder tiltEncoder = new Encoder(0, 1);
+  // *Encoder
+  // private final Encoder extendEncoder = new Encoder(null, null);
+  // private final Encoder tiltEncoder = new Encoder(0, 1);
   Faults extendFault = new Faults();
+
+  // crane motors
+  private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
 
   // Analog Potentiometer
   AnalogPotentiometer potentiometer = new AnalogPotentiometer(0, 145, 30);
@@ -72,18 +73,16 @@ public class Robot extends TimedRobot {
 
   // Speed Variables
   private static double defaultSpeed = -0.4;
-  private static double turnSpeed = -0.4;
-  private static double stopSpeed = 0.0;
+  // private static double turnSpeed = -0.4;
+  // private static double stopSpeed = 0.0;
 
   // Gyroscopes
   WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_rightBack);
 
-  // Gain for a simple P loop
-  double kP = 1;
+  // gain for a simple P loop
+  double proportionalConstant = 0.05;
 
-   //gain for a simple P loop
-  double kPangle = 0.05;
-
+  PIDController pid;
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -96,15 +95,17 @@ public class Robot extends TimedRobot {
     m_rightBack.follow(m_rightFront);
 
     // Invert right side motors
-    m_rightFront.setInverted(true);
-    m_rightBack.setInverted(true);
+    m_leftFront.setInverted(true);
+    m_leftBack.setInverted(true);
 
-    // Add gyro to SmartDashboard
-    SmartDashboard.putData("Gyro", gyro);
+    // // Add gyro to SmartDashboard
+    // SmartDashboard.putNumber("Gyro", gyro.getAngle());
   }
 
   @Override
   public void robotPeriodic() {
+    // Add gyro to SmartDashboard
+    SmartDashboard.putNumber("Gyro", gyro.getAngle());
   }
 
   @Override
@@ -114,6 +115,8 @@ public class Robot extends TimedRobot {
 
     // Reset gyro
     gyro.reset();
+
+    pid = new PIDController(0.5, 0.5, 0.5);
   }
 
   @Override
@@ -121,19 +124,19 @@ public class Robot extends TimedRobot {
     // Reset id
     resetCommandId();
 
-    if (runFor(1)) {
-      SmartDashboard.putNumber("Initial Amount", gyro.getAngle());
-    } else if (runFor(10)) {
-      while (gyro.getAngle() < 90) {
-        m_rightFront.set(-defaultSpeed);
-        m_leftFront.set(defaultSpeed);
-      }
+    // Find the heading error; setpoint is 90
+    // double error = 90 - gyro.getAngle();
+    if (driverInput.getAButton()) {
+      gyro.reset();
     }
-    //Find the heading error; setpoint is 90
-    double error = 90 - gyro.getAngle();
 
-    //Turns the robot to face the desired direction
-    m_drive.tankDrive(kPangle * error, -kPangle*error);
+    // Turns the robot to face the desired direction
+    if (gyro.getAngle() < 45) {
+      m_drive.tankDrive(0.6, -0.6);
+    }
+
+    // m_drive.tankDrive(proportionalConstant * error, -proportionalConstant *
+    // error);
   }
 
   @Override
@@ -142,6 +145,34 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    // drive
+    m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
+
+    // grabber
+    if (driverInput.getRightBumperPressed()) {
+      if (m_grabber.get() == grabberOpen) {
+        m_grabber.set(grabberClose);
+      } else {
+        m_grabber.set(grabberOpen);
+      }
+    }
+    if (driverInput.getPOV() == 0) {
+      tiltAngle = tiltAngle + 0.05;
+    }
+    if (driverInput.getPOV() == 180) {
+      tiltAngle = tiltAngle - 0.05;
+    }
+
+    // Tilt
+    if (driverInput.getYButtonPressed()) {
+      m_tilt.set(0.6);
+    }
+    if (driverInput.getAButtonPressed()) {
+      m_tilt.set(-0.3);
+    }
+    if (driverInput.getAButtonReleased() || driverInput.getYButtonReleased()) {
+      m_tilt.set(0.0);
+    }
   }
 
   @Override
@@ -158,6 +189,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+    if (runFor(1)) {
+      SmartDashboard.putNumber("Initial Amount", gyro.getAngle());
+    } else if (runFor(10)) {
+      while (gyro.getAngle() < 90) {
+        m_rightFront.set(-defaultSpeed);
+        m_leftFront.set(defaultSpeed);
+      }
+    }
   }
 
   @Override
