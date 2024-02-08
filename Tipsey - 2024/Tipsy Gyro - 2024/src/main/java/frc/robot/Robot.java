@@ -17,6 +17,7 @@ import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.wpilibj.XboxController; // Control
 import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
+
 import static frc.robot.Command.*;
 
 /**
@@ -72,7 +73,7 @@ public class Robot extends TimedRobot {
   double tiltAngle = 0.0;
 
   // Speed Variables
-  private static double defaultSpeed = -0.4;
+  // private static double defaultSpeed = -0.4;
   // private static double turnSpeed = -0.4;
   // private static double stopSpeed = 0.0;
 
@@ -80,9 +81,17 @@ public class Robot extends TimedRobot {
   WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_rightBack);
 
   // gain for a simple P loop
-  double proportionalConstant = 0.05;
+  double proportionalConstant = 0.3;
+
+  private double calculateP(double error) {
+    double kP = (1 / Math.PI) * (Math.atan(0.3 * error));
+    SmartDashboard.putNumber("Proportional Constant", kP);
+
+    return kP;
+  }
 
   PIDController pid;
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -98,14 +107,15 @@ public class Robot extends TimedRobot {
     m_leftFront.setInverted(true);
     m_leftBack.setInverted(true);
 
-    // // Add gyro to SmartDashboard
-    // SmartDashboard.putNumber("Gyro", gyro.getAngle());
+    // Add differential drive to SmartDashboard
+    SmartDashboard.putData("Differential Drive", m_drive);
   }
 
   @Override
   public void robotPeriodic() {
     // Add gyro to SmartDashboard
     SmartDashboard.putNumber("Gyro", gyro.getAngle());
+    SmartDashboard.putNumber("Gyro Rate", gyro.getRate());
   }
 
   @Override
@@ -124,19 +134,18 @@ public class Robot extends TimedRobot {
     // Reset id
     resetCommandId();
 
-    // Find the heading error; setpoint is 90
-    // double error = 90 - gyro.getAngle();
-    if (driverInput.getAButton()) {
-      gyro.reset();
+    // Error
+    double error = -gyro.getAngle();
+
+    // Drives forward continuously at half speed, using the gyro to stabilize the
+    // heading
+    if (runFor(2)) {
+      m_drive.tankDrive(.63 + calculateP(error), .63 - calculateP(error));
     }
 
-    // Turns the robot to face the desired direction
-    if (gyro.getAngle() < 45) {
-      m_drive.tankDrive(0.6, -0.6);
-    }
-
-    // m_drive.tankDrive(proportionalConstant * error, -proportionalConstant *
-    // error);
+    // if (runFor(3)) {
+    // m_drive.tankDrive(0.6, 0.6);
+    // }
   }
 
   @Override
@@ -145,6 +154,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    // Reset gyro
+    if (driverInput.getXButtonPressed()) {
+      gyro.reset();
+    }
+
     // drive
     m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
 
@@ -185,17 +199,21 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    resetCommandValues();
   }
 
   @Override
   public void testPeriodic() {
-    if (runFor(1)) {
-      SmartDashboard.putNumber("Initial Amount", gyro.getAngle());
-    } else if (runFor(10)) {
-      while (gyro.getAngle() < 90) {
-        m_rightFront.set(-defaultSpeed);
-        m_leftFront.set(defaultSpeed);
-      }
+    // Reset id
+    resetCommandId();
+
+    // Error
+    double error = -gyro.getRate();
+
+    // Drives forward continuously at half speed, using the gyro to stabilize the
+    // heading
+    if (runFor(3)) {
+      m_drive.tankDrive(.5 + proportionalConstant * error, .5 - proportionalConstant * error);
     }
   }
 
