@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // SmartDashboard
 import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; // Motors
@@ -33,55 +34,54 @@ public class Robot extends TimedRobot {
   @SuppressWarnings("unused")
   private final Timer timer = new Timer();
 
-  // drivetrain motors
+  // Drivetrain motors
   private final WPI_TalonSRX m_leftFront = new WPI_TalonSRX(0);
   private final WPI_TalonSRX m_rightFront = new WPI_TalonSRX(5);
   private final WPI_TalonSRX m_leftBack = new WPI_TalonSRX(4);
   private final WPI_TalonSRX m_rightBack = new WPI_TalonSRX(3);
 
-  // crane motors
+  // Drivetrain
+  private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
+
+  // Xbox controller
+  private final XboxController driverInput = new XboxController(0);
+
+  // Crane motors
   // private final WPI_TalonSRX m_lift = new WPI_TalonSRX(2);
   // private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
   // private final WPI_VictorSPX m_extend = new WPI_VictorSPX(7);
 
-  // drivetrain
-  private final DifferentialDrive m_drive = new DifferentialDrive(m_leftFront, m_rightFront);
-
-  // xbox controller
-  private final XboxController driverInput = new XboxController(0);
-
-  // numatics
+  // Numatics
   private final DoubleSolenoid m_grabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
-  // grabber values
+  // Grabber values
   private final DoubleSolenoid.Value grabberOpen = Value.kReverse;
   private final DoubleSolenoid.Value grabberClose = Value.kForward;
+
+  // Crane motors
+  private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
+
+  // levels of tilt
+  double tiltAngle = 0.0;
 
   // *Encoder
   // private final Encoder extendEncoder = new Encoder(null, null);
   // private final Encoder tiltEncoder = new Encoder(0, 1);
   Faults extendFault = new Faults();
 
-  // crane motors
-  private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
-
-  // Analog Potentiometer
+  // Analog potentiometer
   AnalogPotentiometer potentiometer = new AnalogPotentiometer(0, 145, 30);
-
-  // levels of Tilt
-  double tiltAngle = 0.0;
-
-  // Speed Variables
-  // private static double defaultSpeed = -0.4;
-  // private static double turnSpeed = -0.4;
-  // private static double stopSpeed = 0.0;
 
   // Gyroscopes
   WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_rightBack);
 
-  // gain for a simple P loop
-  double proportionalConstant = 0.3;
+  // Sendable chooser variables
+  private static final String defaultAutonomous = "DefaultAuto";
+  private static final String turn90Autonomous = "TurnAuto";
+  private String m_selectedAutonomous;
+  private final SendableChooser<String> m_sendableChooser = new SendableChooser<String>();
 
+  // Drivetrain p calculator
   private double calculateP(double error) {
     double kP = (1 / Math.PI) * (Math.atan(0.3 * error));
     SmartDashboard.putNumber("Proportional Constant", kP);
@@ -106,6 +106,11 @@ public class Robot extends TimedRobot {
 
     // Add differential drive to SmartDashboard
     SmartDashboard.putData("Differential Drive", m_drive);
+
+    // Autonomous Routines
+    m_sendableChooser.setDefaultOption("Default Autonomous", defaultAutonomous);
+    m_sendableChooser.addOption("90DegRotation", turn90Autonomous);
+    SmartDashboard.putData("Autonomous Routines", m_sendableChooser);
   }
 
   @Override
@@ -122,6 +127,10 @@ public class Robot extends TimedRobot {
 
     // Reset gyro
     gyro.reset();
+
+    // Get autonomous selection
+    m_selectedAutonomous = m_sendableChooser.getSelected();
+    System.out.println("Selected Autonomous: " + m_selectedAutonomous);
   }
 
   @Override
@@ -132,13 +141,19 @@ public class Robot extends TimedRobot {
     // Error
     double error = -gyro.getAngle();
 
-    // Drives forward continuously, using the gyro to stabilize the heading
-    if (runFor(2)) {
-      m_drive.tankDrive(.63 + calculateP(error), .63 - calculateP(error));
-    } else if (runFor(1)) {
-    } else if (runFor(1)) {
-      m_rightFront.set(0.6);
-      m_leftFront.set(-0.6);
+    switch (m_selectedAutonomous) {
+      // *Turns for 90 degrees, using the gyro to stabilize turn amount
+      case turn90Autonomous:
+        
+        break;
+
+      // *Drives forward continuously, using the gyro to stabilize the heading
+      case defaultAutonomous:
+      default:
+        if (runFor(2)) {
+          m_drive.tankDrive(.63 + calculateP(error), .63 - calculateP(error));
+        }
+        break;
     }
   }
 
@@ -200,15 +215,6 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
     // Reset id
     resetCommandId();
-
-    // Error
-    double error = -gyro.getRate();
-
-    // Drives forward continuously at half speed, using the gyro to stabilize the
-    // heading
-    if (runFor(3)) {
-      m_drive.tankDrive(.5 + proportionalConstant * error, .5 - proportionalConstant * error);
-    }
   }
 
   @Override
