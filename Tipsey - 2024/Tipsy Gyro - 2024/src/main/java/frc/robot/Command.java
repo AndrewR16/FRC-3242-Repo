@@ -7,6 +7,7 @@ public class Command {
     private static int commandId;
     private static int currentCommandNumber;
     private static double endTime;
+    private static boolean commandInProgress;
 
     // Timer
     private final static Timer timer = new Timer();
@@ -27,6 +28,7 @@ public class Command {
         currentCommandNumber = -1;
         commandId = -1;
         endTime = 0.0;
+        commandInProgress = false;
 
         // Resets timer and starts it again
         timer.reset();
@@ -61,7 +63,35 @@ public class Command {
             return true;
         }
 
+        // Handle command faliure
         System.err.println("Command ID not recognized");
         return false;
+    }
+
+    protected static boolean runTillComplete() {
+        commandId++;
+        // Handle old and current commands
+        if (commandId < currentCommandNumber) {
+            return false;
+        }
+        if (commandId == currentCommandNumber) {
+            return commandInProgress;
+        }
+
+        // When a new command is recieved
+        if (commandId > currentCommandNumber) {
+            currentCommandNumber++;
+            commandInProgress = true;
+
+            return true;
+        }
+
+        // Handle command faliure
+        System.err.println("Command ID not recognized");
+        return false;
+    }
+
+    protected static void commandCompleted() {
+        commandInProgress = false;
     }
 }
