@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -90,8 +89,6 @@ public class Robot extends TimedRobot {
     return kP;
   }
 
-  PIDController pid;
-
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -125,8 +122,6 @@ public class Robot extends TimedRobot {
 
     // Reset gyro
     gyro.reset();
-
-    pid = new PIDController(0.5, 0.5, 0.5);
   }
 
   @Override
@@ -137,15 +132,14 @@ public class Robot extends TimedRobot {
     // Error
     double error = -gyro.getAngle();
 
-    // Drives forward continuously at half speed, using the gyro to stabilize the
-    // heading
+    // Drives forward continuously, using the gyro to stabilize the heading
     if (runFor(2)) {
       m_drive.tankDrive(.63 + calculateP(error), .63 - calculateP(error));
+    } else if (runFor(1)) {
+    } else if (runFor(1)) {
+      m_rightFront.set(0.6);
+      m_leftFront.set(-0.6);
     }
-
-    // if (runFor(3)) {
-    // m_drive.tankDrive(0.6, 0.6);
-    // }
   }
 
   @Override
