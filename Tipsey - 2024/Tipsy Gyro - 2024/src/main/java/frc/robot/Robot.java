@@ -81,9 +81,16 @@ public class Robot extends TimedRobot {
   private String m_selectedAutonomous;
   private final SendableChooser<String> m_sendableChooser = new SendableChooser<String>();
 
-  // Drivetrain p calculator
-  private double calculateP(double error) {
+  // Forward drive p calculator
+  private double calculatePDrive(double error) {
     double kP = (1 / Math.PI) * (Math.atan(0.3 * error));
+
+    return kP;
+  }
+
+  // Turn p calculator
+  private double calculatePTurn(double error) {
+    double kP = (2 / Math.PI) * (Math.atan(0.05 * error));
     SmartDashboard.putNumber("Proportional Constant", kP);
 
     return kP;
@@ -117,7 +124,6 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     // Add gyro to SmartDashboard
     SmartDashboard.putNumber("Gyro", gyro.getAngle());
-    SmartDashboard.putNumber("Gyro Rate", gyro.getRate());
   }
 
   @Override
@@ -138,20 +144,29 @@ public class Robot extends TimedRobot {
     // Reset id
     resetCommandId();
 
-    // Error
-    double error = -gyro.getAngle();
+    // PID controller error
+    double error;
 
+    // Autonomous routines
     switch (m_selectedAutonomous) {
       // *Turns for 90 degrees, using the gyro to stabilize turn amount
       case turn90Autonomous:
-        
+        error = 90 - gyro.getAngle();
+        SmartDashboard.putNumber("Error", error);
+
+        if (runFor(3)) {
+          m_drive.tankDrive(calculatePTurn(error), -calculatePTurn(error));
+        }
         break;
 
       // *Drives forward continuously, using the gyro to stabilize the heading
       case defaultAutonomous:
       default:
+        error = -gyro.getAngle();
+
+        // Drive forward
         if (runFor(2)) {
-          m_drive.tankDrive(.63 + calculateP(error), .63 - calculateP(error));
+          m_drive.tankDrive(.63 + calculatePDrive(error), .63 - calculatePDrive(error));
         }
         break;
     }
