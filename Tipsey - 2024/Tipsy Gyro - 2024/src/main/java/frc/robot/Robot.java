@@ -77,9 +77,13 @@ public class Robot extends TimedRobot {
 
   // Sendable chooser variables
   private static final String defaultAutonomous = "DefaultAuto";
-  private static final String turn90Autonomous = "TurnAuto";
+  private static final String turn90Autonomous = "Turn90Auto";
+  private static final String turn180Autonomous = "Turn180Auto";
   private String m_selectedAutonomous;
   private final SendableChooser<String> m_sendableChooser = new SendableChooser<String>();
+
+  // PID controller error
+  double error;
 
   // Forward drive p calculator
   private double calculatePDrive(double error) {
@@ -90,7 +94,7 @@ public class Robot extends TimedRobot {
 
   // Turn p calculator
   private double calculatePTurn(double error) {
-    double kP = (2 / Math.PI) * (Math.atan(0.05 * error));
+    double kP = (2 / Math.PI) * (Math.atan(0.025 * error));
     SmartDashboard.putNumber("Proportional Constant", kP);
 
     return kP;
@@ -117,6 +121,7 @@ public class Robot extends TimedRobot {
     // Autonomous Routines
     m_sendableChooser.setDefaultOption("Default Autonomous", defaultAutonomous);
     m_sendableChooser.addOption("90DegRotation", turn90Autonomous);
+    m_sendableChooser.addOption("180DegRotation", turn180Autonomous);
     SmartDashboard.putData("Autonomous Routines", m_sendableChooser);
   }
 
@@ -144,9 +149,6 @@ public class Robot extends TimedRobot {
     // Reset id
     resetCommandId();
 
-    // PID controller error
-    double error;
-
     // Autonomous routines
     switch (m_selectedAutonomous) {
       // *Turns for 90 degrees, using the gyro to stabilize turn amount
@@ -154,8 +156,22 @@ public class Robot extends TimedRobot {
         error = 90 - gyro.getAngle();
         SmartDashboard.putNumber("Error", error);
 
-        if (runFor(3)) {
-          m_drive.tankDrive(calculatePTurn(error), -calculatePTurn(error));
+        if (runFor(10)) {
+          m_leftFront.set(Math.pow(calculatePTurn(error), 1.4));
+          m_rightFront.set(Math.pow(-calculatePTurn(error), 1.4));
+
+          // m_drive.tankDrive(calculatePTurn(error), -calculatePTurn(error));
+        }
+        break;
+
+      // *Turns for 180 degrees, using the gyro to stabilize turn amount
+      case turn180Autonomous:
+        error = 180 - gyro.getAngle();
+        SmartDashboard.putNumber("Error", error);
+
+        if (runFor(10)) {
+          m_leftFront.set(Math.pow(calculatePTurn(error), 1.4));
+          m_rightFront.set(Math.pow(-calculatePTurn(error), 1.4));
         }
         break;
 
@@ -185,6 +201,10 @@ public class Robot extends TimedRobot {
 
     // drive
     m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
+
+    // Heading error
+    error = 90 - gyro.getAngle();
+    SmartDashboard.putNumber("Error", error);
 
     // grabber
     if (driverInput.getRightBumperPressed()) {
