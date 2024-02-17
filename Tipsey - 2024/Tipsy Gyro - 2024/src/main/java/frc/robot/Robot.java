@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
 
 import static frc.robot.Command.*;
+import static frc.robot.DataCollection.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -73,12 +74,13 @@ public class Robot extends TimedRobot {
   AnalogPotentiometer potentiometer = new AnalogPotentiometer(0, 145, 30);
 
   // Gyroscopes
-  WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_rightBack);
+  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_rightBack);
 
   // Sendable chooser variables
   private static final String defaultAutonomous = "DefaultAuto";
   private static final String turn90Autonomous = "Turn90Auto";
   private static final String turn180Autonomous = "Turn180Auto";
+  private static final String accelerationAutonomous = "AccelerateAuto";
   private String m_selectedAutonomous;
   private final SendableChooser<String> m_sendableChooser = new SendableChooser<String>();
 
@@ -122,6 +124,7 @@ public class Robot extends TimedRobot {
     m_sendableChooser.setDefaultOption("Default Autonomous", defaultAutonomous);
     m_sendableChooser.addOption("90DegRotation", turn90Autonomous);
     m_sendableChooser.addOption("180DegRotation", turn180Autonomous);
+    m_sendableChooser.addOption("Acceleration Testing", accelerationAutonomous);
     SmartDashboard.putData("Autonomous Routines", m_sendableChooser);
   }
 
@@ -175,6 +178,11 @@ public class Robot extends TimedRobot {
         }
         break;
 
+      case accelerationAutonomous:
+        // Increase motor speed gradually, then asymptote off as desired speed is
+        // reached
+        break;
+
       // *Drives forward continuously, using the gyro to stabilize the heading
       case defaultAutonomous:
       default:
@@ -190,10 +198,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    // Reset data collection values
+    resetDataValues();
   }
 
   @Override
   public void teleopPeriodic() {
+    // Run data colleciton
+    collectData();
+    
     // Reset gyro
     if (driverInput.getXButtonPressed()) {
       gyro.reset();
