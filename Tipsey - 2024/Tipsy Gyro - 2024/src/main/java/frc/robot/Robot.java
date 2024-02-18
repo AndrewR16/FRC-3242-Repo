@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.Timer; // Timer
 import edu.wpi.first.wpilibj.drive.DifferentialDrive; // Differential Drive
 
 import static frc.robot.Command.*;
-import static frc.robot.DataCollection.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -199,21 +198,26 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     // Reset data collection values
-    resetDataValues();
+    DataCollection.resetDataValues();
   }
 
   @Override
   public void teleopPeriodic() {
     // Run data colleciton
-    collectData();
+    DataCollection.collectData();
+
+    // Output data
+    if (driverInput.getYButtonPressed()) {
+      DataCollection.outputData();
+    }
+    
+    // drive
+    m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
     
     // Reset gyro
     if (driverInput.getXButtonPressed()) {
       gyro.reset();
     }
-
-    // drive
-    m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
 
     // Heading error
     error = 90 - gyro.getAngle();
