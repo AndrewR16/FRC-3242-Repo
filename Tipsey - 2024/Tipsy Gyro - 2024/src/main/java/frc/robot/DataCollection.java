@@ -1,8 +1,6 @@
 package frc.robot;
 
-// PrintWriter
-import java.io.PrintWriter;
-import java.io.IOException;
+import java.util.ArrayList;
 
 // Gyro and timer
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -18,12 +16,11 @@ public class DataCollection {
     private final static WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_rightBack);
 
     // Turning data collection varialbes
-    private static String[] coordinateArray;
-    private static int coordinateIndex;
-    
-    private final static double collectionRate = 0.25; // Seconds
-    private static double lastCollectionTime = 0.0;
-    private static double lastHeading = 0.0;
+    private static ArrayList<String> coordinateArray = new ArrayList<String>();
+
+    private final static double collectionRate = 0.1; // Seconds
+    private static double lastCollectionTime;
+    private static double lastHeading;
 
     // Reset values
     protected static void resetDataValues() {
@@ -31,10 +28,14 @@ public class DataCollection {
         timer.reset();
         timer.start();
 
-        // Reset gyro and coordinateArray
+        // Reset values
         gyro.reset();
-        coordinateArray = new String[40];
-        coordinateIndex = 0;
+        coordinateArray.clear();
+        lastCollectionTime = 0.0;
+        lastHeading = 0.0;
+
+        System.out.println("");
+        System.out.println("X,Y");
     }
 
     // Collects data every "collectionRate" seconds
@@ -44,8 +45,8 @@ public class DataCollection {
             double deltaHeading = gyro.getAngle() - lastHeading;
 
             // Output an ordered pair of the current time and heading
-            coordinateArray[coordinateIndex] = String.format("%f,%f", currentTime, deltaHeading);
-            coordinateIndex++;
+            // coordinateArray.add(String.format("%f,%f", currentTime, deltaHeading));
+            System.out.printf("%f,%f\n", currentTime, deltaHeading);
 
             // Set lastHeading and lastColleciton time
             lastCollectionTime = currentTime;
@@ -55,17 +56,10 @@ public class DataCollection {
 
     // Output data to a csv file
     protected static void outputData() {
-        try (PrintWriter writer = new PrintWriter("output.csv", "UTF-8")) {
-            writer.println("X,Y");  // header row
+        System.out.println("X,Y"); // header row
 
-            for (String coordinate : coordinateArray) {
-                writer.println(coordinate);
-            }
-
-            System.out.println("CSV file created successfully.");
-        } catch (IOException e) {
-            System.out.println("An error occurred while writing to the CSV file.");
-            e.printStackTrace();
+        for (String coordinate : coordinateArray) {
+            System.out.println(coordinate);
         }
     }
 }
