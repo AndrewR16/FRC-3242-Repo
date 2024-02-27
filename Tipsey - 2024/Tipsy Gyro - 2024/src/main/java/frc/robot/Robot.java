@@ -77,8 +77,6 @@ public class Robot extends TimedRobot {
   // Sendable chooser variables
   private static final String defaultAutonomous = "DefaultAuto";
   private static final String turn90Autonomous = "Turn90Auto";
-  private static final String turn180Autonomous = "Turn180Auto";
-  private static final String accelerationAutonomous = "AccelerateAuto";
   private String m_selectedAutonomous;
   private final SendableChooser<String> m_sendableChooser = new SendableChooser<String>();
 
@@ -94,35 +92,33 @@ public class Robot extends TimedRobot {
 
   // Turn p calculator
   private double calculatePTurn(double error) {
-    double kP = 0.01 * error;
+    double kP = 0.007 * error;
+    // Maximum Output
     if (kP < -0.8) {
       kP = -0.8;
     }
     if (kP > 0.8) {
       kP = 0.8;
     }
-    SmartDashboard.putNumber("Proportional Constant", kP);
+
+    // Minimum Output
+    if (kP > 0 && kP < 0.3) {
+      kP = 0.3;
+    }
+    if (kP < 0 && kP > -0.3) {
+      kP = -0.3;
+    }
+
+    // Stop when heading is acheived
+    if (Math.abs(error) < 1) {
+      kP = 0;
+    }
 
     return kP;
   }
 
-  // Turn calibration variables and function
-  private double turnTime;
-  private double turnCalibration;
-
-  @SuppressWarnings("unused")
-  private double turnSpeedCalculation(double b, double m) {
-    double x = timer.get();
-
-    return (-6 * m) / (Math.pow(b, 3)) * x * (x - b);
-  }
-
-  @SuppressWarnings("unused")
-  private double secondaryTurnSpeedCalculation(double b, double m) {
-    double x = timer.get();
-
-    return Math.pow((-20 * m) / (Math.pow(b, 5)) * x * (x - b), 3);
-  }
+  boolean initialCheck = true;
+  double stoppingTime = 0;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -145,8 +141,6 @@ public class Robot extends TimedRobot {
     // Autonomous Routines
     m_sendableChooser.setDefaultOption("Default Autonomous", defaultAutonomous);
     m_sendableChooser.addOption("90DegRotation", turn90Autonomous);
-    m_sendableChooser.addOption("180DegRotation", turn180Autonomous);
-    m_sendableChooser.addOption("Acceleration Testing", accelerationAutonomous);
     SmartDashboard.putData("Autonomous Routines", m_sendableChooser);
   }
 
@@ -162,7 +156,7 @@ public class Robot extends TimedRobot {
     resetCommandValues();
 
     // Reset gyro and timer
-    gyro.reset();
+    // gyro.reset();
     timer.reset();
     timer.start();
 
@@ -176,43 +170,30 @@ public class Robot extends TimedRobot {
     // Reset id
     resetCommandId();
 
-    // Turning variables
-    turnTime = 3.5;
-    turnCalibration = 1.12; // Tipsy 90 Degrees
-
     // Autonomous routines
     switch (m_selectedAutonomous) {
-      // *Turns for 90 degrees, using the gyro to stabilize turn amount
+      // *Turns to 90 degrees, using the gyro to stabilize turn amount
       case turn90Autonomous:
         error = 90 - gyro.getAngle();
         SmartDashboard.putNumber("Error", error);
 
-        if (runFor(10)) {
-          m_leftFront.set(calculatePTurn(error));
-          m_rightFront.set(-calculatePTurn(error));
-        }
-        break;
+        if (runTillComplete()) {
+          double turnRate = calculatePTurn(error);
+          m_leftFront.set(turnRate);
+          m_rightFront.set(-turnRate);
 
-      // *Turns for 180 degrees, using the gyro to stabilize turn amount
-      case turn180Autonomous:
-        error = 180 - gyro.getAngle();
-        SmartDashboard.putNumber("Error", error);
+          if (turnRate == 0) {
+            if (initialCheck) {
+              stoppingTime = timer.get() + 1.5;
+              initialCheck = false;
+            } else if (stoppingTime < timer.get() && turnRate == 0) {
+              initialCheck = true;
+              commandCompleted();
+            }
+          }
 
-        if (runFor(10)) {
-          m_leftFront.set(Math.pow(calculatePTurn(error), 1.4));
-          m_rightFront.set(Math.pow(-calculatePTurn(error), 1.4));
-        }
-        break;
-
-      // *Turns for 90 degrees
-      case accelerationAutonomous:
-        double motorSpeed = turnSpeedCalculation(turnTime, turnCalibration);
-        SmartDashboard.putNumber("Equation Output", motorSpeed);
-        System.out.println(timer.get() + "," + gyro.getRate());
-
-        if (runFor(turnTime)) {
-          m_leftFront.set(motorSpeed);
-          m_rightFront.set(-motorSpeed);
+          SmartDashboard.putNumber("Turn Rate", turnRate);
+          SmartDashboard.putNumber("Motor Speed", m_leftFront.get());
         }
         break;
 
@@ -238,12 +219,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // Run data colleciton
-    DataCollection.collectData(gyro);
-
-    // Output data
-    // if (driverInput.getYButtonPressed()) {
-    // DataCollection.outputData();
-    // }
+    // DataCollection.collectData(gyro);
 
     // drive
     m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
@@ -254,8 +230,8 @@ public class Robot extends TimedRobot {
     }
 
     // Heading error
-    error = 90 - gyro.getAngle();
-    SmartDashboard.putNumber("Error", error);
+    // error = 90 - gyro.getAngle();
+    // SmartDashboard.putNumber("Error", error);
 
     // grabber
     if (driverInput.getRightBumperPressed()) {

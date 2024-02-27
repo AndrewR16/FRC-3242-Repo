@@ -94,4 +94,20 @@ public class Command {
     protected static void commandCompleted() {
         commandInProgress = false;
     }
+
+    protected static boolean runOnce() {
+        commandId++;
+        // Handle old and current commands
+        if (commandId < currentCommandNumber) {
+            return false;
+        }
+        if (commandId == currentCommandNumber) {
+            currentCommandNumber++;
+            return true;
+        }
+
+        // Handle command faliure
+        System.err.println("Command ID not recognized");
+        return false;
+    }
 }
