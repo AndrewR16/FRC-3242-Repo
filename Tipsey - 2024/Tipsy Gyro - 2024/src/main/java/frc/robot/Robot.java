@@ -31,7 +31,6 @@ import static frc.robot.Command.*;
  */
 public class Robot extends TimedRobot {
   // Timer
-  @SuppressWarnings("unused")
   private final Timer timer = new Timer();
 
   // Drivetrain motors
@@ -95,10 +94,34 @@ public class Robot extends TimedRobot {
 
   // Turn p calculator
   private double calculatePTurn(double error) {
-    double kP = (2 / Math.PI) * (Math.atan(0.025 * error));
+    double kP = 0.01 * error;
+    if (kP < -0.8) {
+      kP = -0.8;
+    }
+    if (kP > 0.8) {
+      kP = 0.8;
+    }
     SmartDashboard.putNumber("Proportional Constant", kP);
 
     return kP;
+  }
+
+  // Turn calibration variables and function
+  private double turnTime;
+  private double turnCalibration;
+
+  @SuppressWarnings("unused")
+  private double turnSpeedCalculation(double b, double m) {
+    double x = timer.get();
+
+    return (-6 * m) / (Math.pow(b, 3)) * x * (x - b);
+  }
+
+  @SuppressWarnings("unused")
+  private double secondaryTurnSpeedCalculation(double b, double m) {
+    double x = timer.get();
+
+    return Math.pow((-20 * m) / (Math.pow(b, 5)) * x * (x - b), 3);
   }
 
   /**
@@ -138,8 +161,10 @@ public class Robot extends TimedRobot {
     // Reset command values
     resetCommandValues();
 
-    // Reset gyro
+    // Reset gyro and timer
     gyro.reset();
+    timer.reset();
+    timer.start();
 
     // Get autonomous selection
     m_selectedAutonomous = m_sendableChooser.getSelected();
@@ -151,6 +176,10 @@ public class Robot extends TimedRobot {
     // Reset id
     resetCommandId();
 
+    // Turning variables
+    turnTime = 3.5;
+    turnCalibration = 1.12; // Tipsy 90 Degrees
+
     // Autonomous routines
     switch (m_selectedAutonomous) {
       // *Turns for 90 degrees, using the gyro to stabilize turn amount
@@ -159,10 +188,8 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("Error", error);
 
         if (runFor(10)) {
-          m_leftFront.set(Math.pow(calculatePTurn(error), 1.4));
-          m_rightFront.set(Math.pow(-calculatePTurn(error), 1.4));
-
-          // m_drive.tankDrive(calculatePTurn(error), -calculatePTurn(error));
+          m_leftFront.set(calculatePTurn(error));
+          m_rightFront.set(-calculatePTurn(error));
         }
         break;
 
@@ -177,9 +204,16 @@ public class Robot extends TimedRobot {
         }
         break;
 
+      // *Turns for 90 degrees
       case accelerationAutonomous:
-        // Increase motor speed gradually, then asymptote off as desired speed is
-        // reached
+        double motorSpeed = turnSpeedCalculation(turnTime, turnCalibration);
+        SmartDashboard.putNumber("Equation Output", motorSpeed);
+        System.out.println(timer.get() + "," + gyro.getRate());
+
+        if (runFor(turnTime)) {
+          m_leftFront.set(motorSpeed);
+          m_rightFront.set(-motorSpeed);
+        }
         break;
 
       // *Drives forward continuously, using the gyro to stabilize the heading
@@ -204,16 +238,16 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // Run data colleciton
-    DataCollection.collectData();
+    DataCollection.collectData(gyro);
 
     // Output data
-    if (driverInput.getYButtonPressed()) {
-      DataCollection.outputData();
-    }
-    
+    // if (driverInput.getYButtonPressed()) {
+    // DataCollection.outputData();
+    // }
+
     // drive
     m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
-    
+
     // Reset gyro
     if (driverInput.getXButtonPressed()) {
       gyro.reset();
