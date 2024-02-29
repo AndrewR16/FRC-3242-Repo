@@ -45,6 +45,9 @@ public class Robot extends TimedRobot {
   // Xbox controller
   private final XboxController driverInput = new XboxController(0);
 
+  // Manual control variable
+  private boolean manualControlEnabled;
+
   // Crane motors
   // private final WPI_TalonSRX m_lift = new WPI_TalonSRX(2);
   // private final WPI_TalonSRX m_tilt = new WPI_TalonSRX(1);
@@ -74,11 +77,13 @@ public class Robot extends TimedRobot {
   // Gyroscopes
   private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_rightBack);
 
-  // Sendable chooser variables
+  // Autonomous routines sendable chooser variables
   private static final String defaultAutonomous = "DefaultAuto";
-  private static final String turn90Autonomous = "Turn90Auto";
+  private static final String turnToHeadingAuto = "FaceHeadingAuto";
   private String m_selectedAutonomous;
-  private final SendableChooser<String> m_sendableChooser = new SendableChooser<String>();
+  private final SendableChooser<String> m_autonomousRoutines = new SendableChooser<String>();
+
+  private static final double desiredHeading = 0;
 
   // PID controller error
   double error;
@@ -92,7 +97,7 @@ public class Robot extends TimedRobot {
 
   // Turn p calculator
   private double calculatePTurn(double error) {
-    double kP = 0.007 * error;
+    double kP = 0.006 * error;
     // Maximum Output
     if (kP < -0.8) {
       kP = -0.8;
@@ -139,9 +144,12 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Differential Drive", m_drive);
 
     // Autonomous Routines
-    m_sendableChooser.setDefaultOption("Default Autonomous", defaultAutonomous);
-    m_sendableChooser.addOption("90DegRotation", turn90Autonomous);
-    SmartDashboard.putData("Autonomous Routines", m_sendableChooser);
+    m_autonomousRoutines.setDefaultOption("Default Autonomous", defaultAutonomous);
+    m_autonomousRoutines.addOption("90DegRotation", turnToHeadingAuto);
+    SmartDashboard.putData("Autonomous Routines", m_autonomousRoutines);
+
+    // Heading Selection
+
   }
 
   @Override
@@ -155,13 +163,12 @@ public class Robot extends TimedRobot {
     // Reset command values
     resetCommandValues();
 
-    // Reset gyro and timer
-    // gyro.reset();
+    // Reset timer
     timer.reset();
     timer.start();
 
     // Get autonomous selection
-    m_selectedAutonomous = m_sendableChooser.getSelected();
+    m_selectedAutonomous = m_autonomousRoutines.getSelected();
     System.out.println("Selected Autonomous: " + m_selectedAutonomous);
   }
 
@@ -170,18 +177,22 @@ public class Robot extends TimedRobot {
     // Reset id
     resetCommandId();
 
+    SmartDashboard.putNumber("Desired Heading", desiredHeading);
+
     // Autonomous routines
     switch (m_selectedAutonomous) {
       // *Turns to 90 degrees, using the gyro to stabilize turn amount
-      case turn90Autonomous:
+      case turnToHeadingAuto:
         error = 90 - gyro.getAngle();
-        SmartDashboard.putNumber("Error", error);
+        // SmartDashboard.putNumber("Error", error);
 
         if (runTillComplete()) {
+          // Turn robot
           double turnRate = calculatePTurn(error);
           m_leftFront.set(turnRate);
           m_rightFront.set(-turnRate);
 
+          // Stop after turn is complete
           if (turnRate == 0) {
             if (initialCheck) {
               stoppingTime = timer.get() + 1.5;
@@ -192,8 +203,8 @@ public class Robot extends TimedRobot {
             }
           }
 
-          SmartDashboard.putNumber("Turn Rate", turnRate);
-          SmartDashboard.putNumber("Motor Speed", m_leftFront.get());
+          // SmartDashboard.putNumber("Turn Rate", turnRate);
+          // SmartDashboard.putNumber("Motor Speed", m_leftFront.get());
         }
         break;
 
@@ -213,50 +224,83 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     // Reset data collection values
-    DataCollection.resetDataValues();
+    // DataCollection.resetDataValues();
+
+    // Reset timer
+    timer.reset();
+    timer.start();
+
+    // Initialize manual control
+    manualControlEnabled = true;
+    SmartDashboard.putBoolean("Manual Control", manualControlEnabled);
   }
 
   @Override
   public void teleopPeriodic() {
-    // Run data colleciton
-    // DataCollection.collectData(gyro);
+    // Manual control
+    if (manualControlEnabled) {
+      // Drive
+      m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
 
-    // drive
-    m_drive.arcadeDrive(-driverInput.getLeftY(), -driverInput.getLeftX());
+      // Reset gyro
+      if (driverInput.getXButtonPressed()) {
+        gyro.reset();
+      }
 
-    // Reset gyro
-    if (driverInput.getXButtonPressed()) {
-      gyro.reset();
-    }
+      // Grabber
+      if (driverInput.getRightBumperPressed()) {
+        if (m_grabber.get() == grabberOpen) {
+          m_grabber.set(grabberClose);
+        } else {
+          m_grabber.set(grabberOpen);
+        }
+      }
+      if (driverInput.getPOV() == 0) {
+        tiltAngle = tiltAngle + 0.05;
+      }
+      if (driverInput.getPOV() == 180) {
+        tiltAngle = tiltAngle - 0.05;
+      }
 
-    // Heading error
-    // error = 90 - gyro.getAngle();
-    // SmartDashboard.putNumber("Error", error);
-
-    // grabber
-    if (driverInput.getRightBumperPressed()) {
-      if (m_grabber.get() == grabberOpen) {
-        m_grabber.set(grabberClose);
-      } else {
-        m_grabber.set(grabberOpen);
+      // Tilt
+      if (driverInput.getYButtonPressed()) {
+        m_tilt.set(0.6);
+      }
+      if (driverInput.getAButtonPressed()) {
+        m_tilt.set(-0.3);
+      }
+      if (driverInput.getAButtonReleased() || driverInput.getYButtonReleased()) {
+        m_tilt.set(0.0);
       }
     }
-    if (driverInput.getPOV() == 0) {
-      tiltAngle = tiltAngle + 0.05;
-    }
-    if (driverInput.getPOV() == 180) {
-      tiltAngle = tiltAngle - 0.05;
+
+    // Toggle manual control
+    if (driverInput.getBButtonPressed()) {
+      manualControlEnabled = !manualControlEnabled;
+      SmartDashboard.putBoolean("Manual Control", manualControlEnabled);
     }
 
-    // Tilt
-    if (driverInput.getYButtonPressed()) {
-      m_tilt.set(0.6);
-    }
-    if (driverInput.getAButtonPressed()) {
-      m_tilt.set(-0.3);
-    }
-    if (driverInput.getAButtonReleased() || driverInput.getYButtonReleased()) {
-      m_tilt.set(0.0);
+    // Autonomous control
+    if (manualControlEnabled == false) {
+      // *Turns to 0 degrees
+      error = -gyro.getAngle();
+
+      // Turn robot
+      double turnRate = calculatePTurn(error);
+      m_leftFront.set(turnRate);
+      m_rightFront.set(-turnRate);
+
+      // Stop after turn is complete
+      if (turnRate == 0) {
+        if (initialCheck) {
+          stoppingTime = timer.get() + 1.5;
+          initialCheck = false;
+        } else if (stoppingTime < timer.get() && turnRate == 0) {
+          initialCheck = true;
+          manualControlEnabled = true;
+          SmartDashboard.putBoolean("Manual Control", manualControlEnabled);
+        }
+      }
     }
   }
 
@@ -270,13 +314,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    resetCommandValues();
   }
 
   @Override
   public void testPeriodic() {
-    // Reset id
-    resetCommandId();
   }
 
   @Override
