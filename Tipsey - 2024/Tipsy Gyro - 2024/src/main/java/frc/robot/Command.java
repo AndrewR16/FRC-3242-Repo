@@ -9,6 +9,10 @@ public class Command {
     private static double endTime;
     private static boolean commandInProgress;
 
+    // Confirm completed variables
+    private static boolean initialCheck;
+    private static double stoppingTime;
+
     // Timer
     private final static Timer timer = new Timer();
 
@@ -29,6 +33,8 @@ public class Command {
         commandId = -1;
         endTime = 0.0;
         commandInProgress = false;
+
+        initialCheck = true;
 
         // Resets timer and starts it again
         timer.reset();
@@ -108,6 +114,26 @@ public class Command {
 
         // Handle command faliure
         System.err.println("Command ID not recognized");
+        return false;
+    }
+
+    /**
+     * Used to prevent a routine from finishing early incase the resting value is overshot. 
+     * @param checkedVariable The variable to check whether its equal to the resting value.
+     * @param restingValue The value the checked variable is equal to once the routine is finished.
+     * @return Returns true if the checked variable remains in its resting state after 1.5 seconds and false if otherwise
+     */
+    protected static boolean confirmCompleted(double checkedVariable, double restingValue) {
+        if (checkedVariable == restingValue) {
+            if (initialCheck) {
+                stoppingTime = timer.get() + 1.5;
+                initialCheck = false;
+            } else if (stoppingTime < timer.get()) {
+                initialCheck = true;
+                return true;
+            }
+        }
+
         return false;
     }
 }
