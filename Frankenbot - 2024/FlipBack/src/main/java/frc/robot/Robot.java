@@ -24,11 +24,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  /**
-   * This function is run when the robot is first started up and should be used
-   * for any
-   * initialization code.
-   */
   private final WPI_TalonSRX m_rightBack = new WPI_TalonSRX(1);
   private final WPI_TalonSRX m_leftFront = new WPI_TalonSRX(2);
   private final WPI_TalonSRX m_leftBack = new WPI_TalonSRX(0);
@@ -44,6 +39,11 @@ public class Robot extends TimedRobot {
   private final XboxController controller = new XboxController(0);
   private boolean stopEnabled;
 
+  /**
+   * This function is run when the robot is first started up and should be used
+   * for any
+   * initialization code.
+   */
   @Override
   public void robotInit() {
     // Forces the motors to move "forward"

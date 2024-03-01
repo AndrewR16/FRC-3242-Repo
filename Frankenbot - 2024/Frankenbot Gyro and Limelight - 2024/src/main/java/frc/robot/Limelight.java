@@ -1,5 +1,13 @@
 package frc.robot;
 
+/**
+ * In the Limelight applicaiton, these values should be put in the ID Filters field
+ * according to our team color:
+ * <ul>
+ * <li>Blue: 1, 2, 6, 7, 14, 15, 16</li>
+ * <li>Red: 4, 5, 9, 10, 11, 12, 13</li>
+ * </ul>
+ */
 public class Limelight {
     // Alliance color checker
     protected static final boolean isTeamBlue = true;
@@ -11,12 +19,13 @@ public class Limelight {
 
     /**
      * Drive speed calculator for limelight
+     * 
      * @param error The x axis offset from the april tag
      * @return Speed to set the motors
      */
     protected static double calculatePDrive(double error) {
         double kP = 0.006 * error;
-        
+
         // Maximum Output
         if (kP < -0.8) {
             kP = -0.8;
@@ -41,8 +50,7 @@ public class Limelight {
         return kP;
     }
 
-    // Central april tag ID for the speaker
-    @SuppressWarnings("unused")
+    /** Gets the central april tag ID for the speaker */
     protected static int getSpeakerID() {
         if (isTeamBlue) {
             return 7;
@@ -57,7 +65,6 @@ public class Limelight {
      * @param direction takes in a value of "left" or "right"
      * @return Returns -1 if direction is typed inccorectly
      */
-    @SuppressWarnings("unused")
     protected static int getSourceID(String direction) {
         if (isTeamBlue) {
             if (direction.equals("left")) {
@@ -76,8 +83,7 @@ public class Limelight {
         return -1;
     }
 
-    // Gets the heading for the source
-    @SuppressWarnings("unused")
+    /** Gets the heading for the source */
     protected static int getSourceHeading() {
         if (isTeamBlue) {
             return 220;
@@ -86,13 +92,30 @@ public class Limelight {
         }
     }
 
-    // Gets the april tag ID for the amp
-    @SuppressWarnings("unused")
+    /** Gets the april tag ID for the amp */
     protected static int getAmpID() {
         if (isTeamBlue) {
             return 6;
         } else {
             return 5;
         }
+    }
+
+    /** Gets the name of the station seen by the robot */
+    protected static String getStation(double AprilTagID) {
+        if ((int) AprilTagID == getSpeakerID()) {
+            return "Speaker";
+        }
+        if ((int) AprilTagID == getAmpID()) {
+            return "Amplifier";
+        }
+        if ((int) AprilTagID == getSourceID("left")) {
+            return "Source (Left)";
+        }
+        if ((int) AprilTagID == getSourceID("right")) {
+            return "Source (Right)";
+        }
+
+        return "No station detected";
     }
 }

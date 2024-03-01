@@ -30,8 +30,8 @@ public class Robot extends TimedRobot {
 
   // Motors
   private final WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(2);
-  private final WPI_TalonSRX m_frontRight = new WPI_TalonSRX(3);
   private final WPI_TalonSRX m_backLeft = new WPI_TalonSRX(0);
+  private final WPI_TalonSRX m_frontRight = new WPI_TalonSRX(3);
   private final WPI_TalonSRX m_backRight = new WPI_TalonSRX(1);
 
   // Controller and drive
@@ -39,7 +39,7 @@ public class Robot extends TimedRobot {
   private final MecanumDrive m_robotDrive = new MecanumDrive(m_frontLeft, m_backLeft, m_frontRight, m_backRight);
 
   // Manual control handeler
-  private boolean manualControlEnabled = true;
+  private boolean manualControlEnabled;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -77,17 +77,17 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("X Offest", xOffset);
     SmartDashboard.putNumber("Target Area", targetArea);
     SmartDashboard.putNumber("April Tag ID", tagID);
+    SmartDashboard.putString("Dectected Station", Limelight.getStation(tagID));
 
     // Target an april tag and align x position
     if (runTillComplete()) {
       double driveSpeed = Limelight.calculatePDrive(xOffset);
-      m_robotDrive.driveCartesian(driveSpeed, 0.0, 0.0);
+      m_robotDrive.driveCartesian(0.0, driveSpeed, 0.0);
 
       checkIfCompleted(driveSpeed, 0.0);
     }
+    
     // TODO: Target an april tag and align y position
-    if (runTillComplete()) {
-    }
   }
 
   @Override
@@ -99,7 +99,6 @@ public class Robot extends TimedRobot {
     // Initialize manual control
     manualControlEnabled = true;
     SmartDashboard.putBoolean("Manual Control", manualControlEnabled);
-
   }
 
   @Override
@@ -133,6 +132,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+    m_frontLeft.set(0.4);
+    m_frontRight.set(0.4);
+    m_backLeft.set(0.4);
+    m_backRight.set(0.4);
   }
 
   @Override
