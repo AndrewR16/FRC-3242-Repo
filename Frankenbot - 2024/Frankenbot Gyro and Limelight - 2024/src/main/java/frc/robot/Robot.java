@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import static frc.robot.Command.*;
+import static frc.robot.Controller.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -51,6 +52,9 @@ public class Robot extends TimedRobot {
     // Reverse motors
     m_frontRight.setInverted(true);
     m_backRight.setInverted(true);
+
+    // Meccanum drive in smart dashboard
+    SmartDashboard.putData("Mecanum Drive", m_robotDrive);
   }
 
   @Override
@@ -112,7 +116,7 @@ public class Robot extends TimedRobot {
     // Teleop
     if (manualControlEnabled) {
       // Drive
-      m_robotDrive.driveCartesian(driverInput.getLeftY(), driverInput.getLeftX(), driverInput.getRightX());
+      m_robotDrive.driveCartesian(correctInput(-driverInput.getLeftY()), correctInput(driverInput.getRightX()), correctInput(driverInput.getLeftX()));
     } else {
       // TODO: Add autonomous routines to teleop
     }
@@ -128,14 +132,24 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    resetCommandValues();
   }
 
   @Override
   public void testPeriodic() {
-    m_frontLeft.set(0.4);
-    m_frontRight.set(0.4);
-    m_backLeft.set(0.4);
-    m_backRight.set(0.4);
+    resetCommandId();
+
+    if (runFor(3)) {
+      m_robotDrive.driveCartesian(0.2, 0, 0); // Forward
+    } else if (runFor(3)) {
+      m_robotDrive.driveCartesian(-0.2, 0, 0); // Backward
+    } else if (runFor(3)) {
+      m_robotDrive.driveCartesian(0, -0.2, 0); // Strafe left
+    } else if (runFor(3)) {
+      m_robotDrive.driveCartesian(0, 0.2, 0); // Strafe right
+    } else {
+      m_robotDrive.driveCartesian(0, 0, 0);
+    }
   }
 
   @Override

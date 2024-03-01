@@ -24,7 +24,7 @@ public class Limelight {
      * @return Speed to set the motors
      */
     protected static double calculatePDrive(double error) {
-        double kP = 0.006 * error;
+        double kP = 0.04 * error;
 
         // Maximum Output
         if (kP < -0.8) {
@@ -43,7 +43,7 @@ public class Limelight {
         }
 
         // Stop when heading is acheived
-        if (Math.abs(error) < 1) {
+        if (Math.abs(error) < 3) {
             kP = 0;
         }
 

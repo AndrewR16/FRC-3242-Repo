@@ -17,15 +17,15 @@ public class Command {
     private final static Timer timer = new Timer();
 
     /**
-     * Implement at the start of periodic functions. Resets the values of commandId.
+     * *Implement at the start of periodic functions. Resets the values of commandId.
      */
     protected static void resetCommandId() {
         commandId = -1;
     }
 
     /**
-     * Implement at the start of init functions. Resets the values for all command
-     * variables
+     * *Implement at the start of init functions. Resets the values for all command
+     * *variables
      */
     protected static void resetCommandValues() {
         // Reset command variables
