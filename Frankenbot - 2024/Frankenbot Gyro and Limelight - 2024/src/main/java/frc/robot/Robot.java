@@ -40,7 +40,11 @@ public class Robot extends TimedRobot {
   private final MecanumDrive m_robotDrive = new MecanumDrive(m_frontLeft, m_backLeft, m_frontRight, m_backRight);
 
   // Gyro
-  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_backLeft);
+  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_backRight);
+
+  private double correctedGyroAngle() {
+    return -gyro.getAngle();
+  }
 
   // Manual control handeler
   private boolean manualControlEnabled;
@@ -67,22 +71,26 @@ public class Robot extends TimedRobot {
 
     // Meccanum drive in smart dashboard
     SmartDashboard.putData("Mecanum Drive", m_robotDrive);
-
-    // TODO: Correct gyro
-    SmartDashboard.putNumber("Gyro Heading", gyro.getAngle());
-    SmartDashboard.putNumber("Read Heading", gyro.getAngle());
   }
 
   @Override
   public void robotPeriodic() {
+    // TODO: Correct gyro
+    SmartDashboard.putNumber("Gyro Heading", correctedGyroAngle());
+    SmartDashboard.putNumber("Read Heading", correctedGyroAngle());
+    // Put adjusted heading
+
   }
 
   @Override
   public void autonomousInit() {
+    resetCommandValues();
   }
 
   @Override
   public void autonomousPeriodic() {
+    resetCommandId();
+
     // Limelight
     NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
     NetworkTableEntry xOffsetEntry = limelight.getEntry("tx");
@@ -101,7 +109,9 @@ public class Robot extends TimedRobot {
 
     if (runTillComplete()) {
       // TODO: Align with april tag using gyro
+      SmartDashboard.putString("Current Task", "Aligning Heading");
       double adjustedHeadingError = Proportional.adjustHeadingValue(gyro.getAngle());
+      SmartDashboard.putNumber("Adjusted Heading", adjustedHeadingError);
       double driveSpeed = Proportional.calculatePDrive(adjustedHeadingError, 0.006, 2);
       m_robotDrive.driveCartesian(0.0, 0.0, driveSpeed);
 
@@ -109,9 +119,10 @@ public class Robot extends TimedRobot {
       // driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
       // m_robotDrive.driveCartesian(0.0, driveSpeed, 0.0);
 
-      checkIfCompleted(driveSpeed, 0.0);
+      // checkIfCompleted(driveSpeed, 0.0);
     } else if (runTillComplete()) {
       // TODO (Test): Target an april tag and align y position
+      SmartDashboard.putString("Current Task", "Aligning Y");
       double error = 0.64 - targetArea;
       double driveSpeed = Proportional.calculatePDrive(error, 0.8, 0.05);
       m_robotDrive.driveCartesian(driveSpeed, 0.0, 0.0);
@@ -145,6 +156,10 @@ public class Robot extends TimedRobot {
       // Drive
       m_robotDrive.driveCartesian(correctInput(-driverInput.getLeftY()), correctInput(driverInput.getRightX()),
           correctInput(driverInput.getLeftX()));
+
+      if (driverInput.getXButtonPressed()) {
+        gyro.reset();
+      }
     } else {
       // TODO: Add autonomous routines to teleop
     }
