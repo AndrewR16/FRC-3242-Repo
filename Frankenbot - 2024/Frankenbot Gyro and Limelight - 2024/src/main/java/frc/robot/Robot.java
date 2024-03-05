@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -14,7 +15,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import static frc.robot.Command.*;
-import static frc.robot.Controller.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -39,8 +39,20 @@ public class Robot extends TimedRobot {
   private final XboxController driverInput = new XboxController(0);
   private final MecanumDrive m_robotDrive = new MecanumDrive(m_frontLeft, m_backLeft, m_frontRight, m_backRight);
 
+  // Gyro
+  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_backLeft);
+
   // Manual control handeler
   private boolean manualControlEnabled;
+
+  // Correct controller input
+  protected static double correctInput(double driverInput) {
+    if ((driverInput > 0 && driverInput < 0.15) || (driverInput > -0.15 && driverInput < 0)) {
+      return 0;
+    }
+
+    return driverInput;
+  }
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -55,6 +67,10 @@ public class Robot extends TimedRobot {
 
     // Meccanum drive in smart dashboard
     SmartDashboard.putData("Mecanum Drive", m_robotDrive);
+
+    // TODO: Correct gyro
+    SmartDashboard.putNumber("Gyro Heading", gyro.getAngle());
+    SmartDashboard.putNumber("Read Heading", gyro.getAngle());
   }
 
   @Override
@@ -81,17 +97,28 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("X Offest", xOffset);
     SmartDashboard.putNumber("Target Area", targetArea);
     SmartDashboard.putNumber("April Tag ID", tagID);
-    SmartDashboard.putString("Dectected Station", Limelight.getStation(tagID));
+    SmartDashboard.putString("Dectected Station", LimelightNode.getNodeName((int) tagID));
 
-    // Target an april tag and align x position
     if (runTillComplete()) {
-      double driveSpeed = Limelight.calculatePDrive(xOffset);
-      m_robotDrive.driveCartesian(0.0, driveSpeed, 0.0);
+      // TODO: Align with april tag using gyro
+      double adjustedHeadingError = Proportional.adjustHeadingValue(gyro.getAngle());
+      double driveSpeed = Proportional.calculatePDrive(adjustedHeadingError, 0.006, 2);
+      m_robotDrive.driveCartesian(0.0, 0.0, driveSpeed);
+
+      // Target an april tag and align x position
+      // driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
+      // m_robotDrive.driveCartesian(0.0, driveSpeed, 0.0);
+
+      checkIfCompleted(driveSpeed, 0.0);
+    } else if (runTillComplete()) {
+      // TODO (Test): Target an april tag and align y position
+      double error = 0.64 - targetArea;
+      double driveSpeed = Proportional.calculatePDrive(error, 0.8, 0.05);
+      m_robotDrive.driveCartesian(driveSpeed, 0.0, 0.0);
 
       checkIfCompleted(driveSpeed, 0.0);
     }
-    
-    // TODO: Target an april tag and align y position
+
   }
 
   @Override
@@ -116,7 +143,8 @@ public class Robot extends TimedRobot {
     // Teleop
     if (manualControlEnabled) {
       // Drive
-      m_robotDrive.driveCartesian(correctInput(-driverInput.getLeftY()), correctInput(driverInput.getRightX()), correctInput(driverInput.getLeftX()));
+      m_robotDrive.driveCartesian(correctInput(-driverInput.getLeftY()), correctInput(driverInput.getRightX()),
+          correctInput(driverInput.getLeftX()));
     } else {
       // TODO: Add autonomous routines to teleop
     }
