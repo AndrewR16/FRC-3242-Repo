@@ -22,6 +22,9 @@ public class Constants {
     static int intakeBackSwitchPort = 0;
     static int ampDownSwitchPort = 0;
 
+    // *Gyro
+    protected static int gyroPort = 0;
+
     //*Speed Variables
     static double driveSpeed = 0.4;
     static double shooterSpeed = 0.0;

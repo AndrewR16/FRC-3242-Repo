@@ -41,7 +41,6 @@ public class Robot extends TimedRobot {
 
   // Gyro
   private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_backRight);
-
   private double correctedGyroAngle() {
     return -gyro.getAngle();
   }
@@ -118,7 +117,7 @@ public class Robot extends TimedRobot {
       driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
       m_robotDrive.driveCartesian(0.0, driveSpeed, 0.0);
 
-      // checkIfCompleted(driveSpeed, 0.0);
+      checkIfCompleted(driveSpeed, 0.0);
     } else if (runTillComplete()) {
       // TODO (Test): Target an april tag and align y position
       SmartDashboard.putString("Current Task", "Aligning Y");
