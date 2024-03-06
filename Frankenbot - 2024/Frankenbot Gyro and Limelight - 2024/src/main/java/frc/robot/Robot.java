@@ -75,11 +75,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    // TODO: Correct gyro
+    // Gyro in smart dashboard
     SmartDashboard.putNumber("Gyro Heading", correctedGyroAngle());
     SmartDashboard.putNumber("Read Heading", correctedGyroAngle());
-    // Put adjusted heading
-
+    SmartDashboard.putNumber("Adjusted Heading", Proportional.adjustHeadingValue(gyro.getAngle()));
   }
 
   @Override
@@ -116,8 +115,8 @@ public class Robot extends TimedRobot {
       m_robotDrive.driveCartesian(0.0, 0.0, driveSpeed);
 
       // Target an april tag and align x position
-      // driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
-      // m_robotDrive.driveCartesian(0.0, driveSpeed, 0.0);
+      driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
+      m_robotDrive.driveCartesian(0.0, driveSpeed, 0.0);
 
       // checkIfCompleted(driveSpeed, 0.0);
     } else if (runTillComplete()) {

@@ -17,7 +17,8 @@ public class Command {
     private final static Timer timer = new Timer();
 
     /**
-     * *Implement at the start of periodic functions. Resets the values of commandId.
+     * *Implement at the start of periodic functions. Resets the values of
+     * commandId.
      */
     protected static void resetCommandId() {
         commandId = -1;
@@ -74,6 +75,13 @@ public class Command {
         return false;
     }
 
+    /**
+     * Allows commands to run for an indefinite amount of time until a completed
+     * method is declared.
+     * 
+     * @return True until commandCompleted() or checkIfCompleted() is called in the
+     *         command.
+     */
     protected static boolean runTillComplete() {
         commandId++;
         // Handle old and current commands
@@ -101,6 +109,34 @@ public class Command {
         commandInProgress = false;
     }
 
+    /**
+     * Used to prevent a routine from finishing early incase the resting value is
+     * overshot.
+     * 
+     * @param checkedVariable The variable to check whether its equal to the resting
+     *                        value.
+     * @param restingValue    The value the checked variable is equal to once the
+     *                        routine is finished.
+     * @return Returns true if the checked variable remains in its resting state
+     *         after 1.5 seconds and false if otherwise
+     */
+    protected static void checkIfCompleted(double checkedVariable, double restingValue) {
+        if (checkedVariable == restingValue) {
+            if (initialCheck) {
+                stoppingTime = timer.get() + 1.5;
+                initialCheck = false;
+            } else if (stoppingTime < timer.get()) {
+                initialCheck = true;
+                commandCompleted();
+            }
+        }
+    }
+
+    /**
+     * Returns true one time in a periodic function.
+     * 
+     * @return True if it is the first time the command is called.
+     */
     protected static boolean runOnce() {
         commandId++;
         // Handle old and current commands
@@ -115,26 +151,5 @@ public class Command {
         // Handle command faliure
         System.err.println("Command ID not recognized");
         return false;
-    }
-
-    /**
-     * Used to prevent a routine from finishing early incase the resting value is overshot. 
-     * @param checkedVariable The variable to check whether its equal to the resting value.
-     * @param restingValue The value the checked variable is equal to once the routine is finished.
-     * @return Returns true if the checked variable remains in its resting state after 1.5 seconds and false if otherwise
-     */
-    protected static void checkIfCompleted(double checkedVariable, double restingValue) {
-        if (checkedVariable == restingValue) {
-            if (initialCheck) {
-                stoppingTime = timer.get() + 1.5;
-                initialCheck = false;
-            } else if (stoppingTime < timer.get()) {
-                initialCheck = true;
-                commandCompleted();
-                // return true;
-            }
-        }
-
-        // return false;
     }
 }
