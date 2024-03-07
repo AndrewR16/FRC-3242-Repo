@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * In the Limelight applicaiton, these values should be put in the ID Filters
  * field
@@ -10,9 +12,6 @@ package frc.robot;
  * </ul>
  */
 public class LimelightNode {
-    // Alliance color checker
-    protected static final boolean isTeamBlue = true;
-
     // Node information
     String name;
     int requiredHeading;
@@ -38,12 +37,48 @@ public class LimelightNode {
     private static LimelightNode red_SourceRight = new LimelightNode("Source (Right)", 310, 0.5, 9);
     private static LimelightNode red_SourceLeft = new LimelightNode("Source (Left)", 310, 0.5, 10);
     private static LimelightNode red_Amplifier = new LimelightNode("Amplifier", 270, 0.5, 5);
-    private static LimelightNode red_Speaker = new LimelightNode("Speaker (Center)", 0, 0.5, 4);
+    private static LimelightNode red_Speaker = new LimelightNode("Speaker", 0, 0.5, 4);
 
     // Node list
-    private static LimelightNode[] nodeList = { blue_SourceRight, blue_SourceLeft, blue_Amplifier, blue_Speaker, red_SourceRight, red_SourceLeft, red_Amplifier, red_Speaker };
+    private static LimelightNode[] nodeList = {
+            blue_SourceRight, blue_SourceLeft, blue_Amplifier, blue_Speaker,
+            red_SourceRight, red_SourceLeft, red_Amplifier, red_Speaker
+    };
 
-    // Find node from id
+    // Define node ids
+    protected static int sourceRightId;
+    protected static int sourceLeftId;
+    protected static int amplifierId;
+    protected static int speakerId;
+
+    /**
+     * Sets up the april tag ids corresponding to our team's color for the match
+     * 
+     * @param teamColor The color of our team. Must be "Blue" or "Red"
+     */
+    protected static void setupNodeIds(String teamColor) {
+        if (teamColor.equals("Blue")) {
+            sourceRightId = 1;
+            sourceLeftId = 2;
+            amplifierId = 6;
+            speakerId = 7;
+            SmartDashboard.putString("Team Color", "Blue");
+        } else if (teamColor.equals("Red")) {
+            sourceRightId = 9;
+            sourceLeftId = 10;
+            amplifierId = 5;
+            speakerId = 4;
+            SmartDashboard.putString("Team Color", "Red");
+        } else {
+            SmartDashboard.putString("Team Color", "No color selected");
+        }
+    }
+
+    /**
+     * Gets the name of a node.
+     * 
+     * @param tagId The april tag id of the node.
+     */
     protected static String getNodeName(int tagId) {
         for (LimelightNode node : nodeList) {
             if (node.tagId == tagId) {
@@ -54,6 +89,11 @@ public class LimelightNode {
         return "Id not found";
     }
 
+    /**
+     * Gets the heading required to face the node.
+     * 
+     * @param tagId The april tag id of the node.
+     */
     protected static int getNodeHeading(int tagId) {
         for (LimelightNode node : nodeList) {
             if (node.tagId == tagId) {
@@ -64,6 +104,11 @@ public class LimelightNode {
         return -1;
     }
 
+    /**
+     * Gets the area value required to set the distance to the node.
+     * 
+     * @param tagId The april tag id of the node.
+     */
     protected static double getNodeArea(int tagId) {
         for (LimelightNode node : nodeList) {
             if (node.tagId == tagId) {

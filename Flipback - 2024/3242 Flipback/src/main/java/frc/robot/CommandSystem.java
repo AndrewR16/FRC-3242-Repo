@@ -2,33 +2,33 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Timer;
 
-public class Command {
+public class CommandSystem {
     // Command variables
-    private static int commandId;
-    private static int currentCommandNumber;
-    private static double endTime;
-    private static boolean commandInProgress;
+    private int commandId;
+    private int currentCommandNumber;
+    private double endTime;
+    private boolean commandInProgress;
 
     // Confirm completed variables
-    private static boolean initialCheck;
-    private static double stoppingTime;
+    private boolean initialCheck;
+    private double stoppingTime;
 
     // Timer
-    private final static Timer timer = new Timer();
+    private final Timer timer = new Timer();
 
     /**
-     * *Implement at the start of periodic functions. Resets the values of
+     * Implement at the start of periodic functions. Resets the values of
      * commandId.
      */
-    protected static void resetCommandId() {
+    protected void resetCommandId() {
         commandId = -1;
     }
 
     /**
-     * *Implement at the start of init functions. Resets the values for all command
-     * *variables
+     * Implement at the start of init functions. Resets the values for all command
+     * variables
      */
-    protected static void resetCommandValues() {
+    protected void resetCommandValues() {
         // Reset command variables
         currentCommandNumber = -1;
         commandId = -1;
@@ -50,7 +50,7 @@ public class Command {
      * 
      * @return Whether the current command should continue to run.
      */
-    protected static boolean runFor(double seconds) {
+    protected boolean runFor(double seconds) {
         double currentTime = timer.get();
         commandId++;
 
@@ -82,7 +82,7 @@ public class Command {
      * @return True until commandCompleted() or checkIfCompleted() is called in the
      *         command.
      */
-    protected static boolean runTillComplete() {
+    protected boolean runTillComplete() {
         commandId++;
         // Handle old and current commands
         if (commandId < currentCommandNumber) {
@@ -105,7 +105,7 @@ public class Command {
         return false;
     }
 
-    protected static void commandCompleted() {
+    protected void commandCompleted() {
         commandInProgress = false;
     }
 
@@ -120,7 +120,7 @@ public class Command {
      * @return Returns true if the checked variable remains in its resting state
      *         after 1.5 seconds and false if otherwise
      */
-    protected static void checkIfCompleted(double checkedVariable, double restingValue) {
+    protected void checkIfCompleted(double checkedVariable, double restingValue) {
         if (checkedVariable == restingValue) {
             if (initialCheck) {
                 stoppingTime = timer.get() + 1.5;
@@ -137,7 +137,7 @@ public class Command {
      * 
      * @return True if it is the first time the command is called.
      */
-    protected static boolean runOnce() {
+    protected boolean runOnce() {
         commandId++;
         // Handle old and current commands
         if (commandId < currentCommandNumber) {

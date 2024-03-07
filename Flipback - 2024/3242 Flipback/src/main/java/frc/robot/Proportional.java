@@ -40,7 +40,7 @@ public class Proportional {
      * Adjusts the value of the given heading error to be from -180 to 180, with
      * negative values signifying that the robot is turned too far to the left.
      * 
-     * @param heading The true heading of the robot
+     * @param heading The true heading error of the robot
      * @return The adjusted value of the heading error from -180 to 180;
      */
     public static double adjustHeadingValue(double heading) {

@@ -1,8 +1,9 @@
+// Non lolypop
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Timer;
 
-public class Command {
+public class CommandSystem {
     // Command variables
     private static int commandId;
     private static int currentCommandNumber;
@@ -17,7 +18,7 @@ public class Command {
     private final static Timer timer = new Timer();
 
     /**
-     * *Implement at the start of periodic functions. Resets the values of
+     * Implement at the start of periodic functions. Resets the values of
      * commandId.
      */
     protected static void resetCommandId() {
@@ -25,8 +26,8 @@ public class Command {
     }
 
     /**
-     * *Implement at the start of init functions. Resets the values for all command
-     * *variables
+     * Implement at the start of init functions. Resets the values for all command
+     * variables
      */
     protected static void resetCommandValues() {
         // Reset command variables

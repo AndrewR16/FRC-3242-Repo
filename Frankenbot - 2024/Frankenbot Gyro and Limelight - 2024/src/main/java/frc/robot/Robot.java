@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import static frc.robot.Command.*;
+import static frc.robot.CommandSystem.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -127,7 +127,6 @@ public class Robot extends TimedRobot {
 
       checkIfCompleted(driveSpeed, 0.0);
     }
-
   }
 
   @Override
