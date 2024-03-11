@@ -160,6 +160,8 @@ public class Robot extends TimedRobot {
     } else {
       // TODO: Add autonomous routines to teleop
     }
+
+    SmartDashboard.putNumber("D Pad", driverInput.getPOV());
   }
 
   @Override

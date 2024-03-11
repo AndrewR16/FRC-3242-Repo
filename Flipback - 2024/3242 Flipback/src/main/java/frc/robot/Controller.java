@@ -42,19 +42,27 @@ public class Controller {
 
     // *D Pad
     protected static boolean dPad_Up() {
-        // TODO: Setup d pad
+        if (controller.getPOV() == 0) {
+            return true;
+        }
         return false;
     }
     protected static boolean dPad_Down() {
-        // TODO: Setup d pad
+        if (controller.getPOV() == 180) {
+            return true;
+        }
         return false;
     }
     protected static boolean dPad_Left() {
-        // TODO: Setup d pad
+        if (controller.getPOV() == 270) {
+            return true;
+        }
         return false;
     }
     protected static boolean dPad_Right() {
-        // TODO: Setup d pad
+        if (controller.getPOV() == 90) {
+            return true;
+        }
         return false;
     }
 }

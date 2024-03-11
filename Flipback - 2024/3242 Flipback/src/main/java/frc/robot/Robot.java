@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 
 // Motors
@@ -11,6 +12,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 // Drive and control
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.XboxController;
 
 // Gyro
@@ -20,7 +22,7 @@ import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
 // Limit switches
 import edu.wpi.first.wpilibj.DigitalInput;
 
@@ -40,14 +42,21 @@ public class Robot extends TimedRobot {
   private final CANSparkMax m_ampShooter = new CANSparkMax(Constants.ampShootingPort, MotorType.kBrushed);
   private final CANSparkMax m_intake = new CANSparkMax(Constants.intakePort, MotorType.kBrushed);
   private final CANSparkMax m_flipBack = new CANSparkMax(Constants.flipBackPort, MotorType.kBrushed);
+  private final CANSparkMax m_shooterRotator = new CANSparkMax(Constants.shooterLinearA, MotorType.kBrushed);
+
+  private final AnalogPotentiometer m_rotatorPotentiometer = new AnalogPotentiometer(0);
 
   // Infrared sensors
+  @SuppressWarnings("unused")
   private final DigitalInput intakeInf = new DigitalInput(Constants.intakeInfPort);
+  @SuppressWarnings("unused")
   private final DigitalInput ampInf = new DigitalInput(Constants.ampInfPort);
 
   // Limit switches
-  private final DigitalInput switch_intakeUp = new DigitalInput(Constants.intakeBackSwitchPort);
-  private final DigitalInput switch_intakeDown = new DigitalInput(Constants.intakeFrontSwitchPort);
+  // private final DigitalInput switch_intakeUp = new
+  // DigitalInput(Constants.intakeBackSwitchPort);
+  // private final DigitalInput switch_intakeDown = new
+  // DigitalInput(Constants.intakeFrontSwitchPort);
   @SuppressWarnings("unused")
   private final DigitalInput switch_ampDown = new DigitalInput(Constants.ampDownSwitchPort);
 
@@ -55,18 +64,12 @@ public class Robot extends TimedRobot {
   private final MecanumDrive mDrive = new MecanumDrive(m_frontLeft, m_backLeft, m_frontRight, m_backRight);
   private final XboxController controller = new XboxController(0);
 
-  // Autocontroller
-  AutoController auto = new AutoController(
-      m_frontRight, m_frontLeft, m_backRight, m_backLeft, m_shooter, m_intake,
-      m_flipBack, m_ampShooter, intakeInf, switch_intakeDown, switch_intakeUp, ampInf
-  );
-
   // TODO: Gyro (Adjust port)
-  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(0);
+  // private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(0);
 
-  private double correctedGyroAngle() {
-    return -gyro.getAngle();
-  }
+  // private double correctedGyroAngle() {
+  // return -gyro.getAngle();
+  // }
 
   // Command system
   CommandSystem autonomousCommands = new CommandSystem();
@@ -85,14 +88,17 @@ public class Robot extends TimedRobot {
   // Emergency stop and reverse
   private boolean emergencyStopEnabled = false;
   private boolean reverseMotorsEnabled = false;
+  private boolean reverseDriveDirection = false;
 
   @Override
   public void robotInit() {
     // Set up motors
     m_frontRight.setInverted(true);
     m_backRight.setInverted(true);
+    m_backRight.setInverted(false);
+    m_backLeft.setInverted(false);
 
-    // Mechanum drive in smart dashboard
+// Mechanum drive in smart dashboard
     SmartDashboard.putData("MecanumDrive", mDrive);
 
     // Team color chooser
@@ -104,9 +110,10 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     // Gyro in smart dashboard
-    SmartDashboard.putNumber("Gyro Heading", correctedGyroAngle());
-    SmartDashboard.putNumber("Read Heading", correctedGyroAngle());
-    SmartDashboard.putNumber("Adjusted Heading", Proportional.adjustHeadingValue(gyro.getAngle()));
+    // SmartDashboard.putNumber("Gyro Heading", correctedGyroAngle());
+    // SmartDashboard.putNumber("Read Heading", correctedGyroAngle());
+    // SmartDashboard.putNumber("Adjusted Heading",
+    // Proportional.adjustHeadingValue(gyro.getAngle()));
   }
 
   @Override
@@ -164,18 +171,21 @@ public class Robot extends TimedRobot {
 
     if (aprilTagCommands.runTillComplete()) {
       // Align with april tag using gyro
-      double targetingError = LimelightNode.getNodeHeading((int) targetId) - correctedGyroAngle();
-      double adjustedHeadingError = Proportional.adjustHeadingValue(targetingError);
-      double driveSpeed = Proportional.calculatePDrive(adjustedHeadingError, 0.006, 2);
-      mDrive.driveCartesian(0.0, 0.0, driveSpeed);
+      // double targetingError = LimelightNode.getNodeHeading((int) targetId) -
+      // correctedGyroAngle();
+      // double adjustedHeadingError =
+      // Proportional.adjustHeadingValue(targetingError);
+      // double driveSpeed = Proportional.calculatePDrive(adjustedHeadingError, 0.006,
+      // 2);
+      // mDrive.driveCartesian(0.0, 0.0, driveSpeed);
 
       // SmartDashboard.putString("Current Task", "Aligning Heading");
       // SmartDashboard.putNumber("Adjusted Heading", adjustedHeadingError);
       // TODO: (Test) Target an april tag and align x position
-      driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
-      mDrive.driveCartesian(0.0, driveSpeed, 0.0);
+      // driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
+      // mDrive.driveCartesian(0.0, driveSpeed, 0.0);
 
-      aprilTagCommands.checkIfCompleted(driveSpeed, 0.0);
+      // aprilTagCommands.checkIfCompleted(driveSpeed, 0.0);
     } else if (aprilTagCommands.runTillComplete()) {
       // TODO (Test): Target an april tag and align y position
       SmartDashboard.putString("Current Task", "Aligning Y");
@@ -200,61 +210,75 @@ public class Robot extends TimedRobot {
     // *Mechanum drive
     mDrive.driveCartesian(-Controller.leftStickY(), Controller.rightStickX(), Controller.leftStickX());
 
+    SmartDashboard.putNumber("Right Trigger", controller.getRightTriggerAxis());
+
     // *Shooting (speaker)
+    SmartDashboard.putNumber("Shooter Speed", m_shooter.get());
     if (Controller.rightTrigger()) {
-      m_shooter.set(Constants.shooterSpeed);
+      // m_shooter.set(Constants.speakerShootingSpeed);
+      shootToSpeaker();
     } else {
       m_shooter.set(0);
     }
 
     // *Shooting (amp)
-    if (Controller.leftTrigger()) {
-      // TODO: Set up shooting into amp
-    } else {
-      m_shooter.set(0);
-    }
+    // if (Controller.leftTrigger()) {
+    // // TODO: Set up shooting into amp
+    // } else {
+    // m_shooter.set(0);
+    // }
 
     // *Shooter rotation
+    SmartDashboard.putNumber("Rotation Speed", m_shooterRotator.get());
+    // SmartDashboard.putNumber("Rotation Potentiometer", m_shooterRotator.get());
     if (Controller.dPad_Up()) {
-      // TODO: Rotate shooter up
+      rotateShooterUp();
     } else if (Controller.dPad_Down()) {
-      // TODO: Rotate shooter down
+      rotateShooterDown();
     } else {
-      // speed zero
+      m_shooterRotator.set(0);
     }
 
     // *Intake (in and out)
+    SmartDashboard.putNumber("Intake Speed", m_intake.get());
     if (Controller.dPad_Left()) {
-      // TODO: Intake in
+      intakeIn();
     } else if (Controller.dPad_Right()) {
-      // TODO: Intake out
+      intakeOut();
     } else {
-      // speed zero
+      m_intake.set(0);
     }
 
     // *Intake (rotation/flipback)
     // TODO: Test limit switch direction
-    if (switch_intakeUp.get()) {
-      isIntakeUp = true;
-      intakeFlipping = false;
-    }
-    if (switch_intakeDown.get()) {
-      isIntakeUp = false;
-      intakeFlipping = false;
-    }
+    // if (switch_intakeUp.get()) {
+    //   isIntakeUp = true;
+    //   intakeFlipping = false;
+    // }
+    // if (switch_intakeDown.get()) {
+    //   isIntakeUp = false;
+    //   intakeFlipping = false;
+    // }
 
+    SmartDashboard.putBoolean("Flipback Enabled", intakeFlipping);
     if (controller.getLeftBumperPressed()) {
       intakeFlipping = !intakeFlipping;
+      isIntakeUp = false;
+    }
+    if (controller.getRightBumperPressed()) {
+      intakeFlipping = !intakeFlipping;
+      isIntakeUp = true;
     }
 
+    // Flip intake
     if (intakeFlipping) {
       if (isIntakeUp) {
-        // TODO: move intake down
+        intakeDown();
       } else {
-        // TODO: move intake up
+        intakeUp();
       }
     } else {
-      // speed zero
+      m_flipBack.set(0);
     }
 
     // *Emergency stop
@@ -262,12 +286,6 @@ public class Robot extends TimedRobot {
       emergencyStopEnabled = !emergencyStopEnabled;
     }
     if (emergencyStopEnabled) {
-      // Drive motors
-      m_frontLeft.set(0);
-      m_frontRight.set(0);
-      m_backLeft.set(0);
-      m_backRight.set(0);
-
       // Other motors
       m_shooter.set(0);
       m_ampShooter.set(0);
@@ -276,7 +294,8 @@ public class Robot extends TimedRobot {
     }
 
     // *Reverse motors
-    if (controller.getYButton()) {
+    SmartDashboard.putBoolean("Reverse Enabled", reverseMotorsEnabled);
+    if (controller.getYButtonPressed()) {
       reverseMotorsEnabled = !reverseMotorsEnabled;
 
       if (reverseMotorsEnabled) {
@@ -290,6 +309,22 @@ public class Robot extends TimedRobot {
         m_intake.setInverted(false);
         m_flipBack.setInverted(false);
 
+      }
+    }
+
+    if (controller.getBButtonPressed()) {
+      reverseDriveDirection = !reverseDriveDirection;
+
+      if (reverseDriveDirection) {
+        m_frontRight.setInverted(false);
+        m_backRight.setInverted(false);
+        m_backRight.setInverted(true);
+        m_backLeft.setInverted(true);
+      } else {
+        m_frontRight.setInverted(true);
+        m_backRight.setInverted(true);
+        m_backRight.setInverted(false);
+        m_backLeft.setInverted(false);
       }
     }
 
@@ -309,7 +344,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-    mDrive.driveCartesian(Constants.driveSpeed, 0.0, 0.0);
+    mDrive.driveCartesian(-Controller.leftStickY(), Controller.rightStickX(), Controller.leftStickX());
   }
 
   @Override
@@ -318,5 +353,38 @@ public class Robot extends TimedRobot {
 
   @Override
   public void simulationPeriodic() {
+  }
+
+  // *Motor Commands
+  private void shootToSpeaker() {
+    m_shooter.set(Constants.speakerShootingSpeed);
+  }
+
+  // private void shootToAmplifier() {
+  // m_shooter.set(Constants.ampShootingSpeed);
+  // }
+
+  private void rotateShooterUp() {
+    m_shooterRotator.set(Constants.shooterRotatorSpeed);
+  }
+
+  private void rotateShooterDown() {
+    m_shooterRotator.set(-Constants.shooterRotatorSpeed);
+  }
+
+  private void intakeIn() {
+    m_intake.set(Constants.intakeSpeed);
+  }
+
+  private void intakeOut() {
+    m_intake.set(-Constants.intakeSpeed);
+  }
+
+  private void intakeUp() {
+    m_flipBack.set(Constants.flipBackSpeed);
+  }
+
+  private void intakeDown() {
+    m_flipBack.set(-Constants.flipBackSpeed);
   }
 }
