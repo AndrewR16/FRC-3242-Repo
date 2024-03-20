@@ -5,6 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
+ 
+// LED
 
 // Motors
 import com.revrobotics.CANSparkMax;
@@ -12,56 +15,59 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 // Drive and control
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.XboxController;
 
 // Gyro
-import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+// import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 
 // Limelight
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
+
 // Limit switches
 import edu.wpi.first.wpilibj.DigitalInput;
 
 // SmartDashboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-
+// Potentiometer
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
 public class Robot extends TimedRobot {
   // Wheel motors
-  private final CANSparkMax m_frontLeft = new CANSparkMax(Constants.frontLeftPort, MotorType.kBrushed);
-  private final CANSparkMax m_frontRight = new CANSparkMax(Constants.frontRightPort, MotorType.kBrushed);
-  private final CANSparkMax m_backLeft = new CANSparkMax(Constants.backLeftPort, MotorType.kBrushed);
-  private final CANSparkMax m_backRight = new CANSparkMax(Constants.backRightPort, MotorType.kBrushed);
+  private final CANSparkMax m_frontLeftDrive = new CANSparkMax(Constants.frontLeftPort, MotorType.kBrushed);
+  private final CANSparkMax m_frontRightDrive = new CANSparkMax(Constants.frontRightPort, MotorType.kBrushed);
+  private final CANSparkMax m_backLeftDrive = new CANSparkMax(Constants.backLeftPort, MotorType.kBrushed);
+  private final CANSparkMax m_backRightDrive = new CANSparkMax(Constants.backRightPort, MotorType.kBrushed);
+
+  // Shooter motors
+  private final CANSparkMax m_topLeftShooter = new CANSparkMax(Constants.topLeftShooterPort, MotorType.kBrushed);
+  private final CANSparkMax m_topRightShooter = new CANSparkMax(Constants.topRightShooterPort, MotorType.kBrushed);
+  private final CANSparkMax m_bottomLeftShooter = new CANSparkMax(Constants.bottomLeftShooterPort, MotorType.kBrushed);
+  private final CANSparkMax m_bottomRightShooter = new CANSparkMax(Constants.bottomRightShooterPort,
+      MotorType.kBrushed);
 
   // Other motors
-  private final CANSparkMax m_shooter = new CANSparkMax(Constants.shooterPort, MotorType.kBrushed);
-  private final CANSparkMax m_ampShooter = new CANSparkMax(Constants.ampShootingPort, MotorType.kBrushed);
   private final CANSparkMax m_intake = new CANSparkMax(Constants.intakePort, MotorType.kBrushed);
   private final CANSparkMax m_flipBack = new CANSparkMax(Constants.flipBackPort, MotorType.kBrushed);
   private final CANSparkMax m_shooterRotator = new CANSparkMax(Constants.shooterLinearA, MotorType.kBrushed);
 
+  @SuppressWarnings("unused")
   private final AnalogPotentiometer m_rotatorPotentiometer = new AnalogPotentiometer(0);
 
   // Infrared sensors
-  @SuppressWarnings("unused")
-  private final DigitalInput intakeInf = new DigitalInput(Constants.intakeInfPort);
-  @SuppressWarnings("unused")
-  private final DigitalInput ampInf = new DigitalInput(Constants.ampInfPort);
 
   // Limit switches
-  // private final DigitalInput switch_intakeUp = new
-  // DigitalInput(Constants.intakeBackSwitchPort);
-  // private final DigitalInput switch_intakeDown = new
-  // DigitalInput(Constants.intakeFrontSwitchPort);
-  @SuppressWarnings("unused")
-  private final DigitalInput switch_ampDown = new DigitalInput(Constants.ampDownSwitchPort);
+  private final DigitalInput switch_intakeUp = new DigitalInput(Constants.intakeBackSwitchPort);
+  private final DigitalInput switch_intakeDown = new DigitalInput(Constants.intakeFrontSwitchPort);
+
+  // private final DigitalInput switch_ampDown = new
+  // DigitalInput(Constants.ampDownSwitchPort);
 
   // Mecanum drive
-  private final MecanumDrive mDrive = new MecanumDrive(m_frontLeft, m_backLeft, m_frontRight, m_backRight);
+  private final MecanumDrive mDrive = new MecanumDrive(m_frontLeftDrive, m_backLeftDrive, m_frontRightDrive,
+      m_backRightDrive);
   private final XboxController controller = new XboxController(0);
 
   // TODO: Gyro (Adjust port)
@@ -70,6 +76,9 @@ public class Robot extends TimedRobot {
   // private double correctedGyroAngle() {
   // return -gyro.getAngle();
   // }
+
+  // Flipback Timer
+  private final Timer flipbackTimer = new Timer();
 
   // Command system
   CommandSystem autonomousCommands = new CommandSystem();
@@ -83,7 +92,7 @@ public class Robot extends TimedRobot {
 
   // Intake booleans
   private boolean intakeFlipping = false;
-  private boolean isIntakeUp = true;
+  private boolean isIntakeUp = false;
 
   // Emergency stop and reverse
   private boolean emergencyStopEnabled = false;
@@ -92,13 +101,18 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    // Set up motors
-    m_frontRight.setInverted(true);
-    m_backRight.setInverted(true);
-    m_backRight.setInverted(false);
-    m_backLeft.setInverted(false);
+    // Set up drive motors
+    m_frontRightDrive.setInverted(true);
+    m_backRightDrive.setInverted(true);
+    m_backRightDrive.setInverted(true);
+    m_backLeftDrive.setInverted(false);
 
-// Mechanum drive in smart dashboard
+    // Set up shooter motors
+    // m_topRightShooter.setInverted(true);
+    // m_bottomRightShooter.setInverted(true);
+  
+
+    // Mechanum drive in smart dashboard
     SmartDashboard.putData("MecanumDrive", mDrive);
 
     // Team color chooser
@@ -109,6 +123,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    // Limit Switches
+    SmartDashboard.putBoolean("FlipBack Up", switch_intakeUp.get() == false);
+    SmartDashboard.putBoolean("FlipBack Down", switch_intakeDown.get() == false);
+
     // Gyro in smart dashboard
     // SmartDashboard.putNumber("Gyro Heading", correctedGyroAngle());
     // SmartDashboard.putNumber("Read Heading", correctedGyroAngle());
@@ -203,6 +221,19 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     // Team color selector
     LimelightNode.setupNodeIds(teamColorSelector.getSelected());
+
+    // Set up drive motors
+    m_frontRightDrive.setInverted(true);
+    m_backRightDrive.setInverted(true);
+    m_backRightDrive.setInverted(true);
+    m_backLeftDrive.setInverted(false);
+
+    // Set up shooter motors
+    m_topLeftShooter.setInverted(false);
+    m_topRightShooter.setInverted(false);
+    m_bottomLeftShooter.setInverted(false);
+    m_bottomRightShooter.setInverted(false);
+
   }
 
   @Override
@@ -210,72 +241,90 @@ public class Robot extends TimedRobot {
     // *Mechanum drive
     mDrive.driveCartesian(-Controller.leftStickY(), Controller.rightStickX(), Controller.leftStickX());
 
-    SmartDashboard.putNumber("Right Trigger", controller.getRightTriggerAxis());
-
-    // *Shooting (speaker)
-    SmartDashboard.putNumber("Shooter Speed", m_shooter.get());
+    // *Shooting (speaker) (Right Trigger)
+    SmartDashboard.putNumber("Shooter Speed", m_topLeftShooter.get());
     if (Controller.rightTrigger()) {
-      // m_shooter.set(Constants.speakerShootingSpeed);
-      shootToSpeaker();
-    } else {
-      m_shooter.set(0);
+      // Shoot to speaker
+      runShooter(Constants.speakerShootingSpeed);
+      m_intake.set(-Constants.converyorSpeed);
+      
     }
+    // *Shooting (amp) (Left Trigger)
+    if (Controller.leftTrigger()) {
+      // Shoot to amp
+      runShooter(Constants.ampShootingSpeed);
+       m_intake.set(-Constants.converyorSpeed);
+    } 
+    // *Sets shooting motors back to zero when not in use
+    if(!Controller.rightTrigger() && !Controller.leftTrigger()){
+      runShooter(0);
+      if(!Controller.dPad_Left() || !Controller.dPad_Right()){
+        m_intake.set(0);
+      }
+    }
+    
 
-    // *Shooting (amp)
-    // if (Controller.leftTrigger()) {
-    // // TODO: Set up shooting into amp
-    // } else {
-    // m_shooter.set(0);
-    // }
-
-    // *Shooter rotation
-    SmartDashboard.putNumber("Rotation Speed", m_shooterRotator.get());
+    // *Shooter rotation (Up and Down on D Pad)
+    SmartDashboard.putNumber("Shooter Rotation Speed", m_shooterRotator.get());
     // SmartDashboard.putNumber("Rotation Potentiometer", m_shooterRotator.get());
     if (Controller.dPad_Up()) {
-      rotateShooterUp();
+      // Rotate shooter up (Up on D Pad)
+      m_shooterRotator.set(Constants.shooterRotatorSpeed);
     } else if (Controller.dPad_Down()) {
-      rotateShooterDown();
+      // Rotate shooter down (Down on D Pad)
+      m_shooterRotator.set(-Constants.shooterRotatorSpeed);
     } else {
       m_shooterRotator.set(0);
     }
 
-    // *Intake (in and out)
+    // *Intake (in and out) (Left and Right on D Pad)
     SmartDashboard.putNumber("Intake Speed", m_intake.get());
     if (Controller.dPad_Left()) {
-      intakeIn();
+      // Intake in (Right on D Pad)
+      m_intake.set(Constants.intakeSpeed);
     } else if (Controller.dPad_Right()) {
-      intakeOut();
-    } else {
-      m_intake.set(0);
-    }
+      // Intake out (Left on D Pad)
+      m_intake.set(-Constants.intakeSpeed);
+    } 
 
-    // *Intake (rotation/flipback)
+    // *Intake (rotation/flipback) (Left and Right Bumpers)
     // TODO: Test limit switch direction
-    // if (switch_intakeUp.get()) {
-    //   isIntakeUp = true;
-    //   intakeFlipping = false;
-    // }
-    // if (switch_intakeDown.get()) {
-    //   isIntakeUp = false;
-    //   intakeFlipping = false;
-    // }
+     if (switch_intakeUp.get() == false) {
+     isIntakeUp = true;
+     intakeFlipping = false;
+     }
+     if (switch_intakeDown.get() == false) {
+     isIntakeUp = false;
+     intakeFlipping = false;
+     }
 
+    // Input for fliback
     SmartDashboard.putBoolean("Flipback Enabled", intakeFlipping);
     if (controller.getLeftBumperPressed()) {
+      // Start/stop flipback
       intakeFlipping = !intakeFlipping;
       isIntakeUp = false;
+
+      flipbackTimer.reset();
+      flipbackTimer.start();
     }
     if (controller.getRightBumperPressed()) {
+      // Start/stop flipback
       intakeFlipping = !intakeFlipping;
       isIntakeUp = true;
+
+      flipbackTimer.reset();
+      flipbackTimer.start();
     }
 
     // Flip intake
     if (intakeFlipping) {
       if (isIntakeUp) {
-        intakeDown();
+        // *Intake Up (Right Bumper)
+        m_flipBack.set(Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.6));
       } else {
-        intakeUp();
+        // *Intake Down (Left Bumper)
+        m_flipBack.set(-Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.45));
       }
     } else {
       m_flipBack.set(0);
@@ -287,44 +336,43 @@ public class Robot extends TimedRobot {
     }
     if (emergencyStopEnabled) {
       // Other motors
-      m_shooter.set(0);
-      m_ampShooter.set(0);
+      m_topLeftShooter.set(0);
       m_intake.set(0);
       m_flipBack.set(0);
     }
 
-    // *Reverse motors
+    // *Reverse shooter
     SmartDashboard.putBoolean("Reverse Enabled", reverseMotorsEnabled);
     if (controller.getYButtonPressed()) {
       reverseMotorsEnabled = !reverseMotorsEnabled;
 
       if (reverseMotorsEnabled) {
-        m_shooter.setInverted(true);
-        m_ampShooter.setInverted(true);
-        m_intake.setInverted(true);
-        m_flipBack.setInverted(true);
+        m_topLeftShooter.setInverted(true);
+        m_topRightShooter.setInverted(true);
+        m_bottomLeftShooter.setInverted(true);
+        m_bottomRightShooter.setInverted(true);
       } else {
-        m_shooter.setInverted(false);
-        m_ampShooter.setInverted(false);
-        m_intake.setInverted(false);
-        m_flipBack.setInverted(false);
-
+        m_topLeftShooter.setInverted(false);
+        m_topRightShooter.setInverted(false);
+        m_bottomLeftShooter.setInverted(false);
+        m_bottomRightShooter.setInverted(false);
       }
     }
 
+    // *Reverse Drive Motors
     if (controller.getBButtonPressed()) {
       reverseDriveDirection = !reverseDriveDirection;
 
       if (reverseDriveDirection) {
-        m_frontRight.setInverted(false);
-        m_backRight.setInverted(false);
-        m_backRight.setInverted(true);
-        m_backLeft.setInverted(true);
+        m_frontRightDrive.setInverted(false);
+        m_backRightDrive.setInverted(false);
+        m_frontLeftDrive.setInverted(true);
+        m_backLeftDrive.setInverted(true);
       } else {
-        m_frontRight.setInverted(true);
-        m_backRight.setInverted(true);
-        m_backRight.setInverted(false);
-        m_backLeft.setInverted(false);
+        m_frontRightDrive.setInverted(true);
+        m_backRightDrive.setInverted(true);
+        m_frontLeftDrive.setInverted(false);
+        m_backLeftDrive.setInverted(false);
       }
     }
 
@@ -340,12 +388,20 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+  Timer timer = new Timer();
+  timer.reset();
+  timer.start();
   }
 
   @Override
   public void testPeriodic() {
-    mDrive.driveCartesian(-Controller.leftStickY(), Controller.rightStickX(), Controller.leftStickX());
-  }
+
+
+ }
+
+    // SmartDashboard.putData("FlipBack Up", switch_intakeUp);
+    // SmartDashboard.putData("FlipBack Down", switch_intakeDown);
+  
 
   @Override
   public void simulationInit() {
@@ -356,35 +412,43 @@ public class Robot extends TimedRobot {
   }
 
   // *Motor Commands
-  private void shootToSpeaker() {
-    m_shooter.set(Constants.speakerShootingSpeed);
+  private void runShooter(double speed) {
+    m_topLeftShooter.set(speed);
+    m_topRightShooter.set(speed);
+    m_bottomLeftShooter.set(speed);
+    m_bottomRightShooter.set(speed);
   }
+
+  // private void shootToSpeaker() {
+  // m_shooter.set(Constants.speakerShootingSpeed);
+  // }
 
   // private void shootToAmplifier() {
   // m_shooter.set(Constants.ampShootingSpeed);
   // }
 
-  private void rotateShooterUp() {
-    m_shooterRotator.set(Constants.shooterRotatorSpeed);
-  }
+  // private void rotateShooterUp() {
+  // m_shooterRotator.set(Constants.shooterRotatorSpeed);
+  // }
 
-  private void rotateShooterDown() {
-    m_shooterRotator.set(-Constants.shooterRotatorSpeed);
-  }
+  // private void rotateShooterDown() {
+  // m_shooterRotator.set(-Constants.shooterRotatorSpeed);
+  // }
 
-  private void intakeIn() {
-    m_intake.set(Constants.intakeSpeed);
-  }
+  // private void intakeIn() {
+  // m_intake.set(Constants.intakeSpeed);
+  // }
 
-  private void intakeOut() {
-    m_intake.set(-Constants.intakeSpeed);
-  }
+  // private void intakeOut() {
+  // m_intake.set(-Constants.intakeSpeed);
+  // }
 
-  private void intakeUp() {
-    m_flipBack.set(Constants.flipBackSpeed);
-  }
+  // private void intakeUp() {
+  // m_flipBack.set(Proportional.calculateFlipbackSpeed(kDefaultPeriod,
+  // kDefaultPeriod));
+  // }
 
-  private void intakeDown() {
-    m_flipBack.set(-Constants.flipBackSpeed);
-  }
+  // private void intakeDown() {
+  // m_flipBack.set(-Constants.flipBackSpeed);
+  // }
 }

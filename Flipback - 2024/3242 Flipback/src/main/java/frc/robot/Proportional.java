@@ -58,4 +58,26 @@ public class Proportional {
 
         return heading;
     }
+
+    public static double calculateFlipbackSpeed(double deltaTime, double K) {
+        double flipbackSpeed = Math.pow(K, deltaTime);
+
+        // Maximum Output
+        if (flipbackSpeed < -0.8) {
+            flipbackSpeed = -0.8;
+        }
+        if (flipbackSpeed > 0.8) {
+            flipbackSpeed = 0.8;
+        }
+
+        // Minimum Output
+        if (flipbackSpeed > 0 && flipbackSpeed < 0.1) {
+            flipbackSpeed = 0.1;
+        }
+        if (flipbackSpeed < 0 && flipbackSpeed > -0.1) {   
+            flipbackSpeed = -0.1;
+        }
+
+        return flipbackSpeed;
+    }
 }
