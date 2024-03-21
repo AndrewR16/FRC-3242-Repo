@@ -35,7 +35,7 @@ public class Constants {
     static double speakerShootingSpeed = 0.5;
     static double converyorSpeed = 0.7;
     static double ampShootingSpeed = 0.2;
-    static double intakeSpeed = 0.8;
+    static double intakeSpeed = 1;
     static double flipBackSpeed = 0.6;
     static double shooterRotatorSpeed = 1;
 
