@@ -6,7 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-
+ 
 // LED
 
 // Motors
@@ -32,9 +32,8 @@ import edu.wpi.first.wpilibj.DigitalInput;
 // SmartDashboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-// Potentiometer
-// import edu.wpi.first.wpilibj.AnalogPotentiometer;
-
+//
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
 public class Robot extends TimedRobot {
   // Wheel motors
   private final CANSparkMax m_frontLeftDrive = new CANSparkMax(Constants.frontLeftPort, MotorType.kBrushed);
@@ -81,9 +80,6 @@ public class Robot extends TimedRobot {
   // Flipback Timer
   private final Timer flipbackTimer = new Timer();
 
-  // Intake Timer
-  private final Timer intakeTimer = new Timer();
-
   // Command system
   CommandSystem autonomousCommands = new CommandSystem();
   CommandSystem teleopCommands = new CommandSystem();
@@ -97,9 +93,6 @@ public class Robot extends TimedRobot {
   // Intake booleans
   private boolean intakeFlipping = false;
   private boolean isIntakeUp = false;
-
-  private boolean intakeIn = false;
-  private boolean intakeOut = false;
 
   // Emergency stop and reverse
   private boolean emergencyStopEnabled = false;
@@ -117,6 +110,7 @@ public class Robot extends TimedRobot {
     // Set up shooter motors
     // m_topRightShooter.setInverted(true);
     // m_bottomRightShooter.setInverted(true);
+  
 
     // Mechanum drive in smart dashboard
     SmartDashboard.putData("MecanumDrive", mDrive);
@@ -156,46 +150,34 @@ public class Robot extends TimedRobot {
     autonomousCommands.resetCommandId();
 
     // Limelight
-    // NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
-    // NetworkTableEntry xOffsetEntry = limelight.getEntry("tx");
-    // NetworkTableEntry targetAreaEntry = limelight.getEntry("ta");
-    // NetworkTableEntry aprilTagIDEntry = limelight.getEntry("tid");
+    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTableEntry xOffsetEntry = limelight.getEntry("tx");
+    NetworkTableEntry targetAreaEntry = limelight.getEntry("ta");
+    NetworkTableEntry aprilTagIDEntry = limelight.getEntry("tid");
 
-    // double xOffset = xOffsetEntry.getDouble(0.0);
-    // double targetArea = targetAreaEntry.getDouble(0.0);
-    // double targetId = aprilTagIDEntry.getDouble(0.0);
+    double xOffset = xOffsetEntry.getDouble(0.0);
+    double targetArea = targetAreaEntry.getDouble(0.0);
+    double targetId = aprilTagIDEntry.getDouble(0.0);
 
-    // // Limelight smart dashboard
-    // SmartDashboard.putNumber("X Offest", xOffset);
-    // SmartDashboard.putNumber("Target Area", targetArea);
-    // SmartDashboard.putNumber("April Tag ID", targetId);
-    // SmartDashboard.putString("Dectected Station", LimelightNode.getNodeName((int) targetId));
+    // Limelight smart dashboard
+    SmartDashboard.putNumber("X Offest", xOffset);
+    SmartDashboard.putNumber("Target Area", targetArea);
+    SmartDashboard.putNumber("April Tag ID", targetId);
+    SmartDashboard.putString("Dectected Station", LimelightNode.getNodeName((int) targetId));
 
     // Autonomous Routine
-    if (autonomousCommands.runFor(1)) {
-      // *Roll note into intake
-      m_intake.set(0.5); // Intake in is positive
-    } else if (autonomousCommands.runFor(3)) {
-      // *Shoot note to speaker
-      m_intake.set(-1);
-      runShooter(Constants.speakerShootingSpeed);
-    } else if (autonomousCommands.runFor(3)) {
-      // *Drive backwards to leave starting area
-      mDrive.driveCartesian(-0.5, 0.0, 0.0);
-    }
-    
-    // if (autonomousCommands.runTillComplete()) {
-    //   // TODO: Shoot into speaker
-    // } else if (autonomousCommands.runTillComplete()) {
-    //   // TODO: Drive to amplifier
+    if (autonomousCommands.runTillComplete()) {
+      // TODO: Shoot into speaker
+    } else if (autonomousCommands.runTillComplete()) {
+      // TODO: Drive to amplifier
 
-    //   // Switch over to targeting system once april tag is detected
-    //   if (targetId == LimelightNode.amplifierId) {
-    //     autonomousCommands.commandCompleted();
-    //   }
-    // } else if (autonomousCommands.runTillComplete()) {
-    //   targetAprilTag(xOffset, targetArea, targetId);
-    // }
+      // Switch over to targeting system once april tag is detected
+      if (targetId == LimelightNode.amplifierId) {
+        autonomousCommands.commandCompleted();
+      }
+    } else if (autonomousCommands.runTillComplete()) {
+      targetAprilTag(xOffset, targetArea, targetId);
+    }
   }
 
   /**
@@ -252,9 +234,6 @@ public class Robot extends TimedRobot {
     m_bottomLeftShooter.setInverted(false);
     m_bottomRightShooter.setInverted(false);
 
-    // Intake timer
-    intakeTimer.reset();
-    intakeTimer.start();
   }
 
   @Override
@@ -268,21 +247,22 @@ public class Robot extends TimedRobot {
       // Shoot to speaker
       runShooter(Constants.speakerShootingSpeed);
       m_intake.set(-Constants.converyorSpeed);
-
+      
     }
     // *Shooting (amp) (Left Trigger)
     if (Controller.leftTrigger()) {
       // Shoot to amp
       runShooter(Constants.ampShootingSpeed);
-      m_intake.set(-Constants.converyorSpeed);
-    }
+       m_intake.set(-Constants.converyorSpeed);
+    } 
     // *Sets shooting motors back to zero when not in use
-    if (!Controller.rightTrigger() && !Controller.leftTrigger()) {
+    if(!Controller.rightTrigger() && !Controller.leftTrigger()){
       runShooter(0);
-      if (!Controller.dPad_Left() || !Controller.dPad_Right()) {
+      if(!Controller.dPad_Left() || !Controller.dPad_Right()){
         m_intake.set(0);
       }
     }
+    
 
     // *Shooter rotation (Up and Down on D Pad)
     SmartDashboard.putNumber("Shooter Rotation Speed", m_shooterRotator.get());
@@ -299,48 +279,31 @@ public class Robot extends TimedRobot {
 
     // *Intake (in and out) (Left and Right on D Pad)
     SmartDashboard.putNumber("Intake Speed", m_intake.get());
-    SmartDashboard.putBoolean("Intake In", intakeOut);
-    SmartDashboard.putBoolean("Intake Out", intakeIn);
-    if (Controller.dPad_Left() && intakeTimer.get() > 0.2) {
-      intakeIn = !intakeIn;
-      intakeOut = false;
-
-      intakeTimer.reset();
-      intakeTimer.start();
-    }
-    if (Controller.dPad_Right() && intakeTimer.get() > 0.2) {
-      intakeOut = !intakeOut;
-      intakeIn = false;
-
-      intakeTimer.reset();
-      intakeTimer.start();
-    }
-
-    if (intakeIn) {
+    if (Controller.dPad_Left()) {
       // Intake in (Right on D Pad)
       m_intake.set(Constants.intakeSpeed);
-    } else if (intakeOut) {
+    } else if (Controller.dPad_Right()) {
       // Intake out (Left on D Pad)
       m_intake.set(-Constants.intakeSpeed);
-    }
+    } 
 
     // *Intake (rotation/flipback) (Left and Right Bumpers)
     // TODO: Test limit switch direction
-    if (switch_intakeUp.get() == false && isIntakeUp == false) {
-      isIntakeUp = true;
-      intakeFlipping = false;
-    }
-    if (switch_intakeDown.get() == false && isIntakeUp == true) {
-      isIntakeUp = false;
-      intakeFlipping = false;
-    }
+     if (switch_intakeUp.get() == false) {
+     isIntakeUp = true;
+     intakeFlipping = false;
+     }
+     if (switch_intakeDown.get() == false) {
+     isIntakeUp = false;
+     intakeFlipping = false;
+     }
 
     // Input for fliback
     SmartDashboard.putBoolean("Flipback Enabled", intakeFlipping);
     if (controller.getLeftBumperPressed()) {
       // Start/stop flipback
       intakeFlipping = !intakeFlipping;
-      isIntakeUp = true;
+      isIntakeUp = false;
 
       flipbackTimer.reset();
       flipbackTimer.start();
@@ -348,7 +311,7 @@ public class Robot extends TimedRobot {
     if (controller.getRightBumperPressed()) {
       // Start/stop flipback
       intakeFlipping = !intakeFlipping;
-      isIntakeUp = false;
+      isIntakeUp = true;
 
       flipbackTimer.reset();
       flipbackTimer.start();
@@ -357,11 +320,11 @@ public class Robot extends TimedRobot {
     // Flip intake
     if (intakeFlipping) {
       if (isIntakeUp) {
-        // *Intake Down (Left Bumper)
-        m_flipBack.set(-Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.45));
-      } else {
         // *Intake Up (Right Bumper)
         m_flipBack.set(Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.6));
+      } else {
+        // *Intake Down (Left Bumper)
+        m_flipBack.set(-Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.45));
       }
     } else {
       m_flipBack.set(0);
@@ -425,18 +388,20 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    Timer timer = new Timer();
-    timer.reset();
-    timer.start();
+  Timer timer = new Timer();
+  timer.reset();
+  timer.start();
   }
 
   @Override
   public void testPeriodic() {
 
-  }
 
-  // SmartDashboard.putData("FlipBack Up", switch_intakeUp);
-  // SmartDashboard.putData("FlipBack Down", switch_intakeDown);
+ }
+
+    // SmartDashboard.putData("FlipBack Up", switch_intakeUp);
+    // SmartDashboard.putData("FlipBack Down", switch_intakeDown);
+  
 
   @Override
   public void simulationInit() {

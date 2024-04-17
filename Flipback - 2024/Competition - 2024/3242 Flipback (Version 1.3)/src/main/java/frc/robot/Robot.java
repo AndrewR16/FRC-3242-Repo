@@ -2,6 +2,8 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+// Checked at 3:54
+
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -15,7 +17,9 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 // Drive and control
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.cameraserver.CameraServer;
 
 // Gyro
 // import com.ctre.phoenix.sensors.WPI_PigeonIMU;
@@ -48,17 +52,15 @@ public class Robot extends TimedRobot {
   private final CANSparkMax m_bottomLeftShooter = new CANSparkMax(Constants.bottomLeftShooterPort, MotorType.kBrushed);
   private final CANSparkMax m_bottomRightShooter = new CANSparkMax(Constants.bottomRightShooterPort,
       MotorType.kBrushed);
-
   // Other motors
   private final CANSparkMax m_intake = new CANSparkMax(Constants.intakePort, MotorType.kBrushed);
   private final CANSparkMax m_flipBack = new CANSparkMax(Constants.flipBackPort, MotorType.kBrushed);
   private final CANSparkMax m_shooterRotator = new CANSparkMax(Constants.shooterLinearA, MotorType.kBrushed);
 
-  @SuppressWarnings("unused")
   private final AnalogPotentiometer m_rotatorPotentiometer = new AnalogPotentiometer(0);
 
   // Infrared sensors
-
+  private final DigitalInput intakeInf = new DigitalInput(Constants.intakeInfPort);
   // Limit switches
   private final DigitalInput switch_intakeUp = new DigitalInput(Constants.intakeBackSwitchPort);
   private final DigitalInput switch_intakeDown = new DigitalInput(Constants.intakeFrontSwitchPort);
@@ -80,14 +82,31 @@ public class Robot extends TimedRobot {
 
   // Flipback Timer
   private final Timer flipbackTimer = new Timer();
+  private final Timer autoFlipbackTimer = new Timer();
 
   // Intake Timer
   private final Timer intakeTimer = new Timer();
+
+  /**
+   * <p>
+   * This timer is used to allow for the toggling of the intake wheels with the
+   * left and right d pad buttons. D pad buttons do not have their own WPILib
+   * getDPadButton() pressed method, so the timer is used to mimic this feature.
+   * </p>
+   * 
+   * <p>
+   * In the implementation of this timer, a 0.4 second delay is used between
+   * the initial press of the button is detected, and when the program checks
+   * for the button press again.
+   * </p>
+   */
+  private final Timer intakeControllerTimer = new Timer();
 
   // Command system
   CommandSystem autonomousCommands = new CommandSystem();
   CommandSystem teleopCommands = new CommandSystem();
   CommandSystem aprilTagCommands = new CommandSystem();
+  CommandSystem testingCommands = new CommandSystem();
 
   // Team color chooser
   private static final String blueTeam = "Blue";
@@ -97,6 +116,7 @@ public class Robot extends TimedRobot {
   // Intake booleans
   private boolean intakeFlipping = false;
   private boolean isIntakeUp = false;
+  private boolean isIntakeDown = false;
 
   private boolean intakeIn = false;
   private boolean intakeOut = false;
@@ -125,6 +145,8 @@ public class Robot extends TimedRobot {
     teamColorSelector.setDefaultOption("Blue Team", blueTeam);
     teamColorSelector.addOption("Red Team", redTeam);
     SmartDashboard.putData("Team Color", teamColorSelector);
+
+    CameraServer.startAutomaticCapture();
   }
 
   @Override
@@ -133,6 +155,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("FlipBack Up", switch_intakeUp.get() == false);
     SmartDashboard.putBoolean("FlipBack Down", switch_intakeDown.get() == false);
 
+    SmartDashboard.putBoolean("Intake Inf", intakeInf.get());
+    SmartDashboard.putData("Rotation Potentiometer", m_rotatorPotentiometer);
+
+    SmartDashboard.putBoolean("Start Button", controller.getStartButton());
     // Gyro in smart dashboard
     // SmartDashboard.putNumber("Gyro Heading", correctedGyroAngle());
     // SmartDashboard.putNumber("Read Heading", correctedGyroAngle());
@@ -156,7 +182,8 @@ public class Robot extends TimedRobot {
     autonomousCommands.resetCommandId();
 
     // Limelight
-    // NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
+    // NetworkTable limelight =
+    // NetworkTableInstance.getDefault().getTable("limelight");
     // NetworkTableEntry xOffsetEntry = limelight.getEntry("tx");
     // NetworkTableEntry targetAreaEntry = limelight.getEntry("ta");
     // NetworkTableEntry aprilTagIDEntry = limelight.getEntry("tid");
@@ -169,32 +196,26 @@ public class Robot extends TimedRobot {
     // SmartDashboard.putNumber("X Offest", xOffset);
     // SmartDashboard.putNumber("Target Area", targetArea);
     // SmartDashboard.putNumber("April Tag ID", targetId);
-    // SmartDashboard.putString("Dectected Station", LimelightNode.getNodeName((int) targetId));
+    // SmartDashboard.putString("Dectected Station", LimelightNode.getNodeName((int)
+    // targetId));
 
     // Autonomous Routine
-    if (autonomousCommands.runFor(1)) {
-      // *Roll note into intake
-      m_intake.set(0.5); // Intake in is positive
-    } else if (autonomousCommands.runFor(3)) {
-      // *Shoot note to speaker
-      m_intake.set(-1);
-      runShooter(Constants.speakerShootingSpeed);
-    } else if (autonomousCommands.runFor(3)) {
+    if (autonomousCommands.runFor(3)) {
       // *Drive backwards to leave starting area
-      mDrive.driveCartesian(-0.5, 0.0, 0.0);
+      mDrive.driveCartesian(0.3, 0.0, 0.0);
     }
-    
-    // if (autonomousCommands.runTillComplete()) {
-    //   // TODO: Shoot into speaker
-    // } else if (autonomousCommands.runTillComplete()) {
-    //   // TODO: Drive to amplifier
 
-    //   // Switch over to targeting system once april tag is detected
-    //   if (targetId == LimelightNode.amplifierId) {
-    //     autonomousCommands.commandCompleted();
-    //   }
+    // if (autonomousCommands.runTillComplete()) {
+    // // TODO: Shoot into speaker
     // } else if (autonomousCommands.runTillComplete()) {
-    //   targetAprilTag(xOffset, targetArea, targetId);
+    // // TODO: Drive to amplifier
+
+    // // Switch over to targeting system once april tag is detected
+    // if (targetId == LimelightNode.amplifierId) {
+    // autonomousCommands.commandCompleted();
+    // }
+    // } else if (autonomousCommands.runTillComplete()) {
+    // targetAprilTag(xOffset, targetArea, targetId);
     // }
   }
 
@@ -204,42 +225,45 @@ public class Robot extends TimedRobot {
    */
   private void targetAprilTag(double xOffset, double targetArea, double targetId) {
     aprilTagCommands.resetCommandId();
-
-    if (aprilTagCommands.runTillComplete()) {
-      // Align with april tag using gyro
-      // double targetingError = LimelightNode.getNodeHeading((int) targetId) -
-      // correctedGyroAngle();
-      // double adjustedHeadingError =
-      // Proportional.adjustHeadingValue(targetingError);
-      // double driveSpeed = Proportional.calculatePDrive(adjustedHeadingError, 0.006,
-      // 2);
-      // mDrive.driveCartesian(0.0, 0.0, driveSpeed);
-
-      // SmartDashboard.putString("Current Task", "Aligning Heading");
-      // SmartDashboard.putNumber("Adjusted Heading", adjustedHeadingError);
-      // TODO: (Test) Target an april tag and align x position
-      // driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
-      // mDrive.driveCartesian(0.0, driveSpeed, 0.0);
-
-      // aprilTagCommands.checkIfCompleted(driveSpeed, 0.0);
-    } else if (aprilTagCommands.runTillComplete()) {
-      // TODO (Test): Target an april tag and align y position
-      SmartDashboard.putString("Current Task", "Aligning Y");
-      double error = LimelightNode.getNodeArea((int) targetId) - targetArea;
-      double driveSpeed = Proportional.calculatePDrive(error, 0.8, 0.05);
-      mDrive.driveCartesian(driveSpeed, 0.0, 0.0);
-
-      aprilTagCommands.checkIfCompleted(driveSpeed, 0.0);
-    } else {
-      autonomousCommands.commandCompleted();
-    }
+    /*
+     * if (aprilTagCommands.runTillComplete()) {
+     * // Align with april tag using gyro
+     * // double targetingError = LimelightNode.getNodeHeading((int) targetId) -
+     * // correctedGyroAngle();
+     * // double adjustedHeadingError =
+     * // Proportional.adjustHeadingValue(targetingError);
+     * // double driveSpeed = Proportional.calculatePDrive(adjustedHeadingError,
+     * 0.006,
+     * // 2);
+     * // mDrive.driveCartesian(0.0, 0.0, driveSpeed);
+     * 
+     * // SmartDashboard.putString("Current Task", "Aligning Heading");
+     * // SmartDashboard.putNumber("Adjusted Heading", adjustedHeadingError);
+     * // TODO: (Test) Target an april tag and align x position
+     * // driveSpeed = Proportional.calculatePDrive(xOffset, 0.04, 3);
+     * // mDrive.driveCartesian(0.0, driveSpeed, 0.0);
+     * 
+     * // aprilTagCommands.checkIfCompleted(driveSpeed, 0.0);
+     * } else if (aprilTagCommands.runTillComplete()) {
+     * // TODO (Test): Target an april tag and align y position
+     * SmartDashboard.putString("Current Task", "Aligning Y");
+     * double error = LimelightNode.getNodeArea((int) targetId) - targetArea;
+     * double driveSpeed = Proportional.calculatePDrive(error, 0.8, 0.05);
+     * mDrive.driveCartesian(driveSpeed, 0.0, 0.0);
+     * 
+     * aprilTagCommands.checkIfCompleted(driveSpeed, 0.0);
+     * } else {
+     * autonomousCommands.commandCompleted();
+     * }
+     */
   }
 
   @Override
   public void teleopInit() {
     // Team color selector
-    LimelightNode.setupNodeIds(teamColorSelector.getSelected());
-
+    // LimelightNode.setupNodeIds(teamColorSelector.getSelected());
+    // *reset timer */
+    intakeTimer.reset();
     // Set up drive motors
     m_frontRightDrive.setInverted(true);
     m_backRightDrive.setInverted(true);
@@ -255,10 +279,16 @@ public class Robot extends TimedRobot {
     // Intake timer
     intakeTimer.reset();
     intakeTimer.start();
+
+    intakeControllerTimer.reset();
+    intakeControllerTimer.start();
   }
 
   @Override
   public void teleopPeriodic() {
+    // SmartDashboard.putBoolean("Intake Inf", intakeInf.get());
+    // SmartDashboard.putData("Infared", intakeInf);
+
     // *Mechanum drive
     mDrive.driveCartesian(-Controller.leftStickY(), Controller.rightStickX(), Controller.leftStickX());
 
@@ -267,14 +297,14 @@ public class Robot extends TimedRobot {
     if (Controller.rightTrigger()) {
       // Shoot to speaker
       runShooter(Constants.speakerShootingSpeed);
-      m_intake.set(-Constants.converyorSpeed);
+      m_intake.set(Constants.converyorSpeed);
 
     }
     // *Shooting (amp) (Left Trigger)
     if (Controller.leftTrigger()) {
       // Shoot to amp
       runShooter(Constants.ampShootingSpeed);
-      m_intake.set(-Constants.converyorSpeed);
+      m_intake.set(Constants.converyorSpeed);
     }
     // *Sets shooting motors back to zero when not in use
     if (!Controller.rightTrigger() && !Controller.leftTrigger()) {
@@ -286,14 +316,13 @@ public class Robot extends TimedRobot {
 
     // *Shooter rotation (Up and Down on D Pad)
     SmartDashboard.putNumber("Shooter Rotation Speed", m_shooterRotator.get());
-    // SmartDashboard.putNumber("Rotation Potentiometer", m_shooterRotator.get());
     if (Controller.dPad_Up()) {
       // Rotate shooter up (Up on D Pad)
       m_shooterRotator.set(Constants.shooterRotatorSpeed);
     } else if (Controller.dPad_Down()) {
       // Rotate shooter down (Down on D Pad)
       m_shooterRotator.set(-Constants.shooterRotatorSpeed);
-    } else {
+    } else if (controller.getStartButton() == false) {
       m_shooterRotator.set(0);
     }
 
@@ -301,20 +330,55 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Intake Speed", m_intake.get());
     SmartDashboard.putBoolean("Intake In", intakeOut);
     SmartDashboard.putBoolean("Intake Out", intakeIn);
-    if (Controller.dPad_Left() && intakeTimer.get() > 0.2) {
+
+    // Todo Check over this!!!
+    // *Intake moves till a note is seen. Once it sees it activate a small delay
+    // then stop Outake functions as normal
+    if (Controller.dPad_Left() && intakeControllerTimer.get() > 0.4) { // Hover over timer variable to see documentation
       intakeIn = !intakeIn;
       intakeOut = false;
 
-      intakeTimer.reset();
-      intakeTimer.start();
+      intakeControllerTimer.reset();
+      intakeControllerTimer.start();
     }
-    if (Controller.dPad_Right() && intakeTimer.get() > 0.2) {
+    if (Controller.dPad_Right() && intakeControllerTimer.get() > 0.4) {
       intakeOut = !intakeOut;
       intakeIn = false;
 
-      intakeTimer.reset();
-      intakeTimer.start();
+      intakeControllerTimer.reset();
+      intakeControllerTimer.start();
     }
+    // // *If infrared sees a note start timer delay
+    // if (intakeInf.get()) {
+    // if (intakeTimer.get() == 0) {
+    // intakeTimer.reset();
+    // intakeTimer.start();
+    // } else if (intakeTimer.get() > Constants.intakeDelay) {
+    // // *ready to shoot. Stop wheels */
+    // intakeIn = false;
+    // intakeOut = false;
+
+    // if (switch_intakeUp.get() == true) { // if intake up limit switch is not
+    // pressed
+    // if (autoFlipbackTimer.get() == 0) {
+    // autoFlipbackTimer.reset();
+    // autoFlipbackTimer.start();
+    // }
+
+    // // Flipback goes up
+    // m_flipBack.set(Proportional.calculateFlipbackSpeed(autoFlipbackTimer.get(),
+    // 0.8));
+    // } else {
+    // if (autoFlipbackTimer.get() != 0) {
+    // autoFlipbackTimer.stop();
+    // autoFlipbackTimer.reset();
+    // intakeTimer.stop();
+    // intakeTimer.reset();
+    // }
+    // m_flipBack.set(0);
+    // }
+    // }
+    // }
 
     if (intakeIn) {
       // Intake in (Right on D Pad)
@@ -322,10 +386,11 @@ public class Robot extends TimedRobot {
     } else if (intakeOut) {
       // Intake out (Left on D Pad)
       m_intake.set(-Constants.intakeSpeed);
+    } else if (Controller.leftTrigger() == false && Controller.rightTrigger() == false) {
+      m_intake.set(0);
     }
 
     // *Intake (rotation/flipback) (Left and Right Bumpers)
-    // TODO: Test limit switch direction
     if (switch_intakeUp.get() == false && isIntakeUp == false) {
       isIntakeUp = true;
       intakeFlipping = false;
@@ -338,17 +403,19 @@ public class Robot extends TimedRobot {
     // Input for fliback
     SmartDashboard.putBoolean("Flipback Enabled", intakeFlipping);
     if (controller.getLeftBumperPressed()) {
-      // Start/stop flipback
+      // Start/stop flipback down
       intakeFlipping = !intakeFlipping;
       isIntakeUp = true;
+      isIntakeDown = false;
 
       flipbackTimer.reset();
       flipbackTimer.start();
     }
     if (controller.getRightBumperPressed()) {
-      // Start/stop flipback
+      // Start/stop flipback up
       intakeFlipping = !intakeFlipping;
       isIntakeUp = false;
+      isIntakeDown = true;
 
       flipbackTimer.reset();
       flipbackTimer.start();
@@ -358,42 +425,40 @@ public class Robot extends TimedRobot {
     if (intakeFlipping) {
       if (isIntakeUp) {
         // *Intake Down (Left Bumper)
-        m_flipBack.set(-Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.45));
-      } else {
+        m_flipBack.set(-Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.8));
+      } else if (isIntakeDown) {
         // *Intake Up (Right Bumper)
-        m_flipBack.set(Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.6));
+        m_flipBack.set(Proportional.calculateFlipbackSpeed(flipbackTimer.get(), 0.8));
       }
     } else {
       m_flipBack.set(0);
     }
-
+    System.out.println();
     // *Emergency stop
-    if (controller.getXButtonPressed()) {
-      emergencyStopEnabled = !emergencyStopEnabled;
-    }
-    if (emergencyStopEnabled) {
-      // Other motors
-      m_topLeftShooter.set(0);
-      m_intake.set(0);
-      m_flipBack.set(0);
-    }
+    // if (controller.getXButtonPressed()) {
+    //   emergencyStopEnabled = !emergencyStopEnabled;
+    // }
+    // if (emergencyStopEnabled) {
+    //   // Other motors
+    //   m_topLeftShooter.set(0);
+    //   m_intake.set(0);
+    // }
 
-    // *Reverse shooter
-    SmartDashboard.putBoolean("Reverse Enabled", reverseMotorsEnabled);
-    if (controller.getYButtonPressed()) {
-      reverseMotorsEnabled = !reverseMotorsEnabled;
+    // Reverse shooter
+    // SmartDashboard.putBoolean("Reverse Enabled", reverseMotorsEnabled);
+    // if (controller.getYButtonPressed()) {
+    // reverseMotorsEnabled = !reverseMotorsEnabled;
 
-      if (reverseMotorsEnabled) {
-        m_topLeftShooter.setInverted(true);
-        m_topRightShooter.setInverted(true);
-        m_bottomLeftShooter.setInverted(true);
-        m_bottomRightShooter.setInverted(true);
-      } else {
-        m_topLeftShooter.setInverted(false);
-        m_topRightShooter.setInverted(false);
-        m_bottomLeftShooter.setInverted(false);
-        m_bottomRightShooter.setInverted(false);
-      }
+    // if (reverseMotorsEnabled) {
+    // m_intake.setInverted(true);
+    // } else {
+    // m_intake.setInverted(false);
+    // }
+    // }
+    // *reverse intake */
+    if (controller.getYButton()) {
+      runShooter(-0.2);
+      m_intake.set(-1);
     }
 
     // *Reverse Drive Motors
@@ -413,8 +478,31 @@ public class Robot extends TimedRobot {
       }
     }
 
+    // 55 degrees: .21
+    // 60 degrees:
+    // *Set to shooting angle
+    if (controller.getStartButton()) {
+      if (m_rotatorPotentiometer.get() > 0.2125 + 0.01) {
+        m_shooterRotator.set(-Constants.shooterRotatorSpeed);
+      } else if (m_rotatorPotentiometer.get() < 0.2125 - 0.01) {
+        m_shooterRotator.set(Constants.shooterRotatorSpeed);
+      }
+      else {
+        m_shooterRotator.set(0);
+      }
+    }
+  
+    if (controller.getBackButton()) {
+      if (m_rotatorPotentiometer.get() > 0.241 + 0.01) {
+        m_shooterRotator.set(-Constants.shooterRotatorSpeed);
+      } else if (m_rotatorPotentiometer.get() < 0.241 - 0.01) {
+        m_shooterRotator.set(Constants.shooterRotatorSpeed);
+      }
+      else {
+        m_shooterRotator.set(0);
+      }
+    }
   }
-
   @Override
   public void disabledInit() {
   }

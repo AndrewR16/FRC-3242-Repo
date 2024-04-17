@@ -156,46 +156,34 @@ public class Robot extends TimedRobot {
     autonomousCommands.resetCommandId();
 
     // Limelight
-    // NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
-    // NetworkTableEntry xOffsetEntry = limelight.getEntry("tx");
-    // NetworkTableEntry targetAreaEntry = limelight.getEntry("ta");
-    // NetworkTableEntry aprilTagIDEntry = limelight.getEntry("tid");
+    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTableEntry xOffsetEntry = limelight.getEntry("tx");
+    NetworkTableEntry targetAreaEntry = limelight.getEntry("ta");
+    NetworkTableEntry aprilTagIDEntry = limelight.getEntry("tid");
 
-    // double xOffset = xOffsetEntry.getDouble(0.0);
-    // double targetArea = targetAreaEntry.getDouble(0.0);
-    // double targetId = aprilTagIDEntry.getDouble(0.0);
+    double xOffset = xOffsetEntry.getDouble(0.0);
+    double targetArea = targetAreaEntry.getDouble(0.0);
+    double targetId = aprilTagIDEntry.getDouble(0.0);
 
-    // // Limelight smart dashboard
-    // SmartDashboard.putNumber("X Offest", xOffset);
-    // SmartDashboard.putNumber("Target Area", targetArea);
-    // SmartDashboard.putNumber("April Tag ID", targetId);
-    // SmartDashboard.putString("Dectected Station", LimelightNode.getNodeName((int) targetId));
+    // Limelight smart dashboard
+    SmartDashboard.putNumber("X Offest", xOffset);
+    SmartDashboard.putNumber("Target Area", targetArea);
+    SmartDashboard.putNumber("April Tag ID", targetId);
+    SmartDashboard.putString("Dectected Station", LimelightNode.getNodeName((int) targetId));
 
     // Autonomous Routine
-    if (autonomousCommands.runFor(1)) {
-      // *Roll note into intake
-      m_intake.set(0.5); // Intake in is positive
-    } else if (autonomousCommands.runFor(3)) {
-      // *Shoot note to speaker
-      m_intake.set(-1);
-      runShooter(Constants.speakerShootingSpeed);
-    } else if (autonomousCommands.runFor(3)) {
-      // *Drive backwards to leave starting area
-      mDrive.driveCartesian(-0.5, 0.0, 0.0);
-    }
-    
-    // if (autonomousCommands.runTillComplete()) {
-    //   // TODO: Shoot into speaker
-    // } else if (autonomousCommands.runTillComplete()) {
-    //   // TODO: Drive to amplifier
+    if (autonomousCommands.runTillComplete()) {
+      // TODO: Shoot into speaker
+    } else if (autonomousCommands.runTillComplete()) {
+      // TODO: Drive to amplifier
 
-    //   // Switch over to targeting system once april tag is detected
-    //   if (targetId == LimelightNode.amplifierId) {
-    //     autonomousCommands.commandCompleted();
-    //   }
-    // } else if (autonomousCommands.runTillComplete()) {
-    //   targetAprilTag(xOffset, targetArea, targetId);
-    // }
+      // Switch over to targeting system once april tag is detected
+      if (targetId == LimelightNode.amplifierId) {
+        autonomousCommands.commandCompleted();
+      }
+    } else if (autonomousCommands.runTillComplete()) {
+      targetAprilTag(xOffset, targetArea, targetId);
+    }
   }
 
   /**
