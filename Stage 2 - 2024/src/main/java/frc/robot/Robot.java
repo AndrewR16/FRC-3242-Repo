@@ -104,7 +104,9 @@ private final AutoController Auto = new AutoController(m_LeftFront,m_LeftBack,m_
   
 
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+
+  }
 
   @Override
   public void autonomousInit() {
@@ -208,6 +210,7 @@ private final AutoController Auto = new AutoController(m_LeftFront,m_LeftBack,m_
       Lift1.set(0.1);
       Lift2.set(0.1);
     }
+    
     //Encoder
     if(controller.getRightBumper()){
       //Raises lift

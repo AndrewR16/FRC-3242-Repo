@@ -458,13 +458,13 @@ public class Robot extends TimedRobot {
     // m_intake.setInverted(false);
     // }
     // }
-    // *reverse intake */
+    // *Reverse intake (Y)
     if (controller.getYButton()) {
       runShooter(-0.2);
       m_intake.set(-1);
     }
 
-    // *Reverse Drive Motors
+    // *Reverse Drive Motors (B)
     if (controller.getBButtonPressed()) {
       reverseDriveDirection = !reverseDriveDirection;
 
