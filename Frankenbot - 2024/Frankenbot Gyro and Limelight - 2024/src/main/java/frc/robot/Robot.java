@@ -4,6 +4,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.networktables.NetworkTable;
@@ -41,6 +47,7 @@ public class Robot extends TimedRobot {
 
   // Gyro
   private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(m_backRight);
+
   private double correctedGyroAngle() {
     return -gyro.getAngle();
   }
@@ -57,6 +64,10 @@ public class Robot extends TimedRobot {
     return driverInput;
   }
 
+  BooleanLogEntry myBooleanLog;
+  DoubleLogEntry myDoubleLog;
+  StringLogEntry myStringLog;
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -70,6 +81,13 @@ public class Robot extends TimedRobot {
 
     // Meccanum drive in smart dashboard
     SmartDashboard.putData("Mecanum Drive", m_robotDrive);
+
+    DataLogManager.start();
+
+    DataLog log = DataLogManager.getLog();
+    myBooleanLog = new BooleanLogEntry(log, "/my/boolean");
+    myDoubleLog = new DoubleLogEntry(log, "/my/double");
+    myStringLog = new StringLogEntry(log, "/my/string");
   }
 
   @Override
