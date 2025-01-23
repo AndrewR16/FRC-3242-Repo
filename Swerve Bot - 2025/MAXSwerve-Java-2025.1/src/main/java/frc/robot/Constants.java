@@ -82,6 +82,10 @@ public final class Constants {
     public static final double kDriveDeadband = 0.05;
   }
 
+  public static final class SensorConstants {
+    public static final int kGyroDeviceId = 0;
+  }
+
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
