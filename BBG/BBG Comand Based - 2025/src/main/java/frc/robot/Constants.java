@@ -16,4 +16,27 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
+  public static class DriveConstants {
+    public static final int kLeftLeadMotorPort = 10;
+    public static final int kLeftFollowMotorPort = 9;
+    public static final int kRightLeadMotorPort = 12;
+    public static final int kRightFollowMotorPort = 11;
+  }
+
+  public static class ShooterConstants {
+    public static final int kIntakeMotorPort = 1;
+    
+    public static final int kFirstFeederMotorPort = 2;
+    public static final int kSecondFeederMotorPort = 3;
+    public static final int kThirdFeederMotorPort = 4;
+    
+    public static final int kLauncherMotorPort = 8;
+  }
+
+  public static class SensorConstants {
+    public static final int kFirstPositionPort = 1;
+    public static final int kSecondPositionPort = 3;
+    public static final int kThirdPositionPort = 5;
+  }
 }
