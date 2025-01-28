@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.robot.Constants.DriveConstants;
@@ -25,6 +26,10 @@ public class DriveSubsystem extends SubsystemBase {
 
         // Invert right side motors to ensure correct direction
         m_rightLeader.setInverted(true);
+        m_rightFollower.setInverted(true);
+
+        // Add differential drive to SmartDashboard
+        SmartDashboard.putData("Differential Drive", m_robotDrive);
     }
 
     /**
