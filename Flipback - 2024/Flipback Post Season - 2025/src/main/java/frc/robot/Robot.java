@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj.Timer;
 // LED
 
 // Motors
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 // Drive and control
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
@@ -41,21 +41,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class Robot extends TimedRobot {
   // Wheel motors
-  private final CANSparkMax m_frontLeftDrive = new CANSparkMax(Constants.frontLeftPort, MotorType.kBrushed);
-  private final CANSparkMax m_frontRightDrive = new CANSparkMax(Constants.frontRightPort, MotorType.kBrushed);
-  private final CANSparkMax m_backLeftDrive = new CANSparkMax(Constants.backLeftPort, MotorType.kBrushed);
-  private final CANSparkMax m_backRightDrive = new CANSparkMax(Constants.backRightPort, MotorType.kBrushed);
+  private final SparkMax m_frontLeftDrive = new SparkMax(Constants.frontLeftPort, MotorType.kBrushed);
+  private final SparkMax m_frontRightDrive = new SparkMax(Constants.frontRightPort, MotorType.kBrushed);
+  private final SparkMax m_backLeftDrive = new SparkMax(Constants.backLeftPort, MotorType.kBrushed);
+  private final SparkMax m_backRightDrive = new SparkMax(Constants.backRightPort, MotorType.kBrushed);
 
   // Shooter motors
-  private final CANSparkMax m_topLeftShooter = new CANSparkMax(Constants.topLeftShooterPort, MotorType.kBrushed);
-  private final CANSparkMax m_topRightShooter = new CANSparkMax(Constants.topRightShooterPort, MotorType.kBrushed);
-  private final CANSparkMax m_bottomLeftShooter = new CANSparkMax(Constants.bottomLeftShooterPort, MotorType.kBrushed);
-  private final CANSparkMax m_bottomRightShooter = new CANSparkMax(Constants.bottomRightShooterPort,
+  private final SparkMax m_topLeftShooter = new SparkMax(Constants.topLeftShooterPort, MotorType.kBrushed);
+  private final SparkMax m_topRightShooter = new SparkMax(Constants.topRightShooterPort, MotorType.kBrushed);
+  private final SparkMax m_bottomLeftShooter = new SparkMax(Constants.bottomLeftShooterPort, MotorType.kBrushed);
+  private final SparkMax m_bottomRightShooter = new SparkMax(Constants.bottomRightShooterPort,
       MotorType.kBrushed);
   // Other motors
-  private final CANSparkMax m_intake = new CANSparkMax(Constants.intakePort, MotorType.kBrushed);
-  private final CANSparkMax m_flipBack = new CANSparkMax(Constants.flipBackPort, MotorType.kBrushed);
-  private final CANSparkMax m_shooterRotator = new CANSparkMax(Constants.shooterLinearA, MotorType.kBrushed);
+  private final SparkMax m_intake = new SparkMax(Constants.intakePort, MotorType.kBrushed);
+  private final SparkMax m_flipBack = new SparkMax(Constants.flipBackPort, MotorType.kBrushed);
+  private final SparkMax m_shooterRotator = new SparkMax(Constants.shooterLinearA, MotorType.kBrushed);
 
   private final AnalogPotentiometer m_rotatorPotentiometer = new AnalogPotentiometer(0);
 
