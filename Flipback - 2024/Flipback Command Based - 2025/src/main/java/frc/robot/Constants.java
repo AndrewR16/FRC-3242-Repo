@@ -27,13 +27,20 @@ public final class Constants {
         // Linear actuator port
         public static final int kLinearActuatorPort = 1;
 
-        // Shooter motor speed
-        public static final int kShooterSpeed = 1;
+        // Potentiometer port
+        public static final int kPotentiometerPort = 0;
+
+        // Shooter motor speeds
+        public static final double kShooterSpeed = 1.0;
+        public static final double kShooterReverseSpeed = -0.2;
+
+        // Shooter rotation speed
+        public static final double kShooterRotationSpeed = 1.0;
     }
 
     public final class IntakeConstants {
         // Intake and flip intake motor ports
-        public static final int kIntakeMotorCanId = 7;
+        public static final int kIntakeFeedMotorCanId = 7;
         public static final int kIntakeFlipMotorCanId = 6;
 
         // Intake infrared sensor port
@@ -43,7 +50,8 @@ public final class Constants {
         public static final int kIntakeUpLimitSwitchPort = 4;
         public static final int kIntakeDownLimitSwitchPort = 3;
 
-        // Intake flip motor speed
+        // Intake motor speeds
+        public static final double kIntakeFeedSpeed = 1.0;
         public static final double kIntakeFlipSpeed = 0.6;
     }
 }
