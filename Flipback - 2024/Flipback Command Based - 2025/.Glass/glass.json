@@ -1,0 +1,19 @@
+{
+  "NetworkTables": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Robot Drive": "MecanumDrive"
+    },
+    "windows": {
+      "/SmartDashboard/Robot Drive": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "3242"
+  }
+}
