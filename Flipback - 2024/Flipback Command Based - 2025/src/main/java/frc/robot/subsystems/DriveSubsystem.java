@@ -23,10 +23,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     public DriveSubsystem() {
         // Configure all drive motors
-        m_frontLeftDrive.configure(Configs.drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_backLeftDrive.configure(Configs.drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_frontRightDrive.configure(Configs.invertedDrivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_backRightDrive.configure(Configs.invertedDrivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_frontLeftDrive.configure(Configs.standardConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_backLeftDrive.configure(Configs.standardConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_frontRightDrive.configure(Configs.invertedConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_backRightDrive.configure(Configs.invertedConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // Add mecanum drive to SmartDashboard
         SmartDashboard.putData("Robot Drive", m_robotDrive);
