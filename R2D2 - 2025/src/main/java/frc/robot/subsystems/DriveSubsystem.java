@@ -31,6 +31,6 @@ public class DriveSubsystem extends SubsystemBase {
      * @param rot the commanded rotation
      */
     public void arcadeDrive(double fwd, double rot) {
-        m_robotDrive.arcadeDrive(fwd, rot);
+        m_robotDrive.arcadeDrive(fwd * DriveConstants.kMaxDriveSpeed, rot * DriveConstants.kMaxTurnSpeed);
     }
 }

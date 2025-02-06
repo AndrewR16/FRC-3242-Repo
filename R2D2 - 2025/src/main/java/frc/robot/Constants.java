@@ -6,7 +6,12 @@ public class Constants {
       }
     
     public static class DriveConstants {
-        public static final int kLeftDriveMotorCANId = 0;
-        public static final int kRightDriveMotorCANId = 0;
+        // Max motor speeds
+        public static final double kMaxDriveSpeed = 0.8;
+        public static final double kMaxTurnSpeed = 0.8;
+        
+        // Motor CAN ids
+        public static final int kLeftDriveMotorCANId = 4;
+        public static final int kRightDriveMotorCANId = 3;
     }
 }
