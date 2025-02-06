@@ -6,6 +6,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.ShooterConstants;
@@ -42,34 +43,34 @@ public class ShooterSubsystem extends SubsystemBase {
         m_bottomRightShooter.set(speed);
     }
 
-    // Shoot game piece
-    public void shoot() {
-        fireShooterMotors(ShooterConstants.kShooterSpeed);
+    /** Return a command to shoot a game piece */
+    public Command shootCommand() {
+        return this.runOnce(() -> fireShooterMotors(ShooterConstants.kShooterSpeed));
     }
 
     // Spin shooter motors in reverse
-    public void shootReverse() {
-        fireShooterMotors(ShooterConstants.kShooterReverseSpeed);
+    public Command shootReverse() {
+        return this.runOnce(() -> fireShooterMotors(ShooterConstants.kShooterReverseSpeed));
     }
 
     // Stop all shooter motors
-    public void stopShooter() {
-        fireShooterMotors(0.0);
+    public Command stopShooter() {
+        return this.runOnce(() -> fireShooterMotors(0.0));
     }
 
     // Rotate shooter up
-    public void shooterUp() {
-        m_linearActuator.set(ShooterConstants.kShooterRotationSpeed);
+    public Command shooterUp() {
+        return this.runOnce(() -> m_linearActuator.set(ShooterConstants.kShooterRotationSpeed));
     }
 
     // Rotate shooter down
-    public void shooterDown() {
-        m_linearActuator.set(-ShooterConstants.kShooterRotationSpeed);
+    public Command shooterDown() {
+        return this.runOnce(() -> m_linearActuator.set(-ShooterConstants.kShooterRotationSpeed));
     }
 
     // Stop shooter rotation
-    public void stopShooterRotation() {
-        m_linearActuator.set(0.0);
+    public Command stopShooterRotation() {
+        return this.runOnce(() -> m_linearActuator.set(0.0));
     }
 
     // Get potentiometer value

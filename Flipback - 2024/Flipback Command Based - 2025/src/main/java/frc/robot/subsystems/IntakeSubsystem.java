@@ -6,6 +6,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.IntakeConstants;
@@ -29,33 +30,33 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     // Flip intake up
-    public void intakeUp() {
-        m_intakeFlipMotor.set(IntakeConstants.kIntakeFlipSpeed);
+    public Command intakeUp() {
+        return this.runOnce(() -> m_intakeFlipMotor.set(IntakeConstants.kIntakeFlipSpeed));
     }
 
     // Flip intake down
-    public void intakeDown() {
-        m_intakeFlipMotor.set(-IntakeConstants.kIntakeFlipSpeed);
+    public Command intakeDown() {
+        return this.runOnce(() -> m_intakeFlipMotor.set(-IntakeConstants.kIntakeFlipSpeed));
     }
 
     // Stop intake flip
-    public void stopIntakeFlip() {
-        m_intakeFlipMotor.set(0.0);
+    public Command stopIntakeFlip() {
+        return this.runOnce(() -> m_intakeFlipMotor.set(0.0));
     }
 
     // Feed game piece into intake
-    public void intakeIn() {
-        m_intakeFeedMotor.set(-IntakeConstants.kIntakeFeedSpeed);
+    public Command intakeIn() {
+        return this.runOnce(() -> m_intakeFeedMotor.set(-IntakeConstants.kIntakeFeedSpeed));
     }
 
     // Push game piece out of intake
-    public void intakeOut() {
-        m_intakeFeedMotor.set(IntakeConstants.kIntakeFeedSpeed);
+    public Command intakeOut() {
+        return this.runOnce(() -> m_intakeFeedMotor.set(IntakeConstants.kIntakeFeedSpeed));
     }
 
     // Stop the intake feed motor
-    public void stopIntakeFeed() {
-        m_intakeFeedMotor.set(0.0);
+    public Command stopIntakeFeed() {
+        return this.runOnce(() -> m_intakeFeedMotor.set(0.0));
     }
 
     /**
