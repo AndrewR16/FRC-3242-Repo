@@ -24,6 +24,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // Shooter rotaor potentiometer
     private final AnalogPotentiometer m_rotatorPotentiometer = new AnalogPotentiometer(ShooterConstants.kPotentiometerPort);
 
+    // Shooter configurations
     public ShooterSubsystem() {
         // Configure shooter motors
         m_topLeftShooter.configure(Configs.shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -36,41 +37,39 @@ public class ShooterSubsystem extends SubsystemBase {
      * Set all the shooter motors to a given speed
      * @param speed speed of the shooter motors
      */
-    private void fireShooterMotors(double speed) {
+    private void setShooterSpeed(double speed) {
         m_topLeftShooter.set(speed);
         m_bottomLeftShooter.set(speed);
         m_topRightShooter.set(speed);
         m_bottomRightShooter.set(speed);
     }
 
-    /** Return a command to shoot a game piece */
+    /** Fires all shooter motors forward */
     public Command shootCommand() {
-        return this.runOnce(() -> fireShooterMotors(ShooterConstants.kShooterSpeed));
+        return this.startEnd(
+            () -> setShooterSpeed(ShooterConstants.kShooterSpeed), 
+            () -> setShooterSpeed(0.0));
     }
 
-    // Spin shooter motors in reverse
-    public Command shootReverse() {
-        return this.runOnce(() -> fireShooterMotors(ShooterConstants.kShooterReverseSpeed));
+    /** Fires all shooter motors in reverse at a low speed*/
+    public Command shootReverseCommand() {
+        return this.startEnd(
+            () -> setShooterSpeed(ShooterConstants.kShooterReverseSpeed), 
+            () -> setShooterSpeed(0.0));
     }
 
-    // Stop all shooter motors
-    public Command stopShooter() {
-        return this.runOnce(() -> fireShooterMotors(0.0));
+    /** Rotates the shooter up */
+    public Command shooterUpCommand() {
+        return this.startEnd(
+            () -> m_linearActuator.set(ShooterConstants.kShooterRotationSpeed), 
+            () -> m_linearActuator.set(0.0));
     }
 
-    // Rotate shooter up
-    public Command shooterUp() {
-        return this.runOnce(() -> m_linearActuator.set(ShooterConstants.kShooterRotationSpeed));
-    }
-
-    // Rotate shooter down
-    public Command shooterDown() {
-        return this.runOnce(() -> m_linearActuator.set(-ShooterConstants.kShooterRotationSpeed));
-    }
-
-    // Stop shooter rotation
-    public Command stopShooterRotation() {
-        return this.runOnce(() -> m_linearActuator.set(0.0));
+    /** Rotates the shooter down */
+    public Command shooterDownCommand() {
+        return this.startEnd(
+            () -> m_linearActuator.set(-ShooterConstants.kShooterRotationSpeed), 
+            () -> m_linearActuator.set(0.0));
     }
 
     // Get potentiometer value

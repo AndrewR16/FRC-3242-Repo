@@ -23,52 +23,56 @@ public class IntakeSubsystem extends SubsystemBase {
     private final DigitalInput m_intakeUpSwitch = new DigitalInput(IntakeConstants.kIntakeUpLimitSwitchPort);
     private final DigitalInput m_intakeDownSwitch = new DigitalInput(IntakeConstants.kIntakeDownLimitSwitchPort);
 
+    // Intake configuration
     public IntakeSubsystem() {
         // Configure intake motors
-        m_intakeFeedMotor.configure(Configs.standardConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_intakeFlipMotor.configure(Configs.standardConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_intakeFeedMotor.configure(Configs.standardConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+        m_intakeFlipMotor.configure(Configs.standardConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
     }
 
-    // Flip intake up
-    public Command intakeUp() {
-        return this.runOnce(() -> m_intakeFlipMotor.set(IntakeConstants.kIntakeFlipSpeed));
+    /** Flips intake into the up position */
+    public Command intakeUpCommand() {
+        return this.startEnd(
+            () -> m_intakeFlipMotor.set(IntakeConstants.kIntakeFlipSpeed), 
+            () -> m_intakeFlipMotor.set(0.0));
     }
 
-    // Flip intake down
-    public Command intakeDown() {
-        return this.runOnce(() -> m_intakeFlipMotor.set(-IntakeConstants.kIntakeFlipSpeed));
+    /** Flips intake into the down position */
+    public Command intakeDownCommand() {
+        return this.startEnd(
+            () -> m_intakeFlipMotor.set(-IntakeConstants.kIntakeFlipSpeed), 
+            () -> m_intakeFlipMotor.set(0.0));
     }
 
-    // Stop intake flip
-    public Command stopIntakeFlip() {
-        return this.runOnce(() -> m_intakeFlipMotor.set(0.0));
+    /** Runs the intake inwards */
+    public Command intakeInCommand() {
+        return this.startEnd(
+            () -> m_intakeFeedMotor.set(-IntakeConstants.kIntakeFeedSpeed), 
+            () -> m_intakeFeedMotor.set(0.0));
     }
 
-    // Feed game piece into intake
-    public Command intakeIn() {
-        return this.runOnce(() -> m_intakeFeedMotor.set(-IntakeConstants.kIntakeFeedSpeed));
-    }
-
-    // Push game piece out of intake
-    public Command intakeOut() {
-        return this.runOnce(() -> m_intakeFeedMotor.set(IntakeConstants.kIntakeFeedSpeed));
-    }
-
-    // Stop the intake feed motor
-    public Command stopIntakeFeed() {
-        return this.runOnce(() -> m_intakeFeedMotor.set(0.0));
+    /** Runs the intake outwards */
+    public Command intakeOutCommand() {
+        return this.startEnd(
+            () -> m_intakeFeedMotor.set(IntakeConstants.kIntakeFeedSpeed), 
+            () -> m_intakeFeedMotor.set(0.0));
     }
 
     /**
-     * Get the infared sensor value from the intake
-     * @return whether the game piece is seen by the sensor
+     * Gets the infared sensor value from the intake
+     * 
+     * @return whether a game piece is seen by the sensor
      */
     public boolean getSensorValue() {
         return !m_intakeInfared.get();
     }
 
     /**
-     * Get the status of the limit switch that checks whether the intake is flipped up
+     * Gets the status of the limit switch that checks whether the intake is flipped
+     * up
+     * 
      * @return whether the intake is flipped up
      */
     public boolean getIntakeUp() {
@@ -76,7 +80,9 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     /**
-     * Get the status of the limit switch that checks whether the intake is flipped down
+     * Gets the status of the limit switch that checks whether the intake is flipped
+     * down
+     * 
      * @return whether the intake is flipped down
      */
     public boolean getIntakeDown() {
