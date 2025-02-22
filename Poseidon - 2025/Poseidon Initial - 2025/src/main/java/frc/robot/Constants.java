@@ -60,6 +60,25 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
   }
 
+  public static final class ElevatorConstants{
+    // Can Ids
+    public static final int kLiftCanId = -1;
+    public static final int kGantryCanId = -1;
+
+    // Manual control speeds
+    public static final double kDefaultLiftSpeed = 0.3;
+    public static final double kDefaultGantrySpeed = 0.2;
+  }
+
+  public static final class ShooterConstants{
+    public static final int kJawCanId = -1;
+    public static final int kShooterCanId = -1;
+
+    public static final double kDefaultJawSpeed = 0.2;
+    public static final double kDefaultShooterInSpeed = 0.3;
+    public static final double kDefaultShooterOutSpeed = 0.4;
+  }
+
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T,
     // 13T, or 14T. This changes the drive speed of the module (a pinion gear with

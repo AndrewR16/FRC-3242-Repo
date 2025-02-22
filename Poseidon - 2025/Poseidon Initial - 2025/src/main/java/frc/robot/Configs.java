@@ -51,6 +51,25 @@ public final class Configs {
                     // longer route.
                     .positionWrappingEnabled(true)
                     .positionWrappingInputRange(0, turningFactor);
-        }
+
+                }
+            }
+            
+    public static final class Elevator {
+        public static final SparkMaxConfig liftConfig = new SparkMaxConfig();
+        public static final SparkMaxConfig gantryConfig = new SparkMaxConfig();
+        
+        static {
+            liftConfig
+                .idleMode(IdleMode.kBrake);
+
+            gantryConfig
+                .idleMode(IdleMode.kBrake);
+        }                
+    }
+
+    public static final class Shooter{
+        public static final SparkMaxConfig jawConfig = new SparkMaxConfig();
+        public static final SparkMaxConfig shooterConfig = new SparkMaxConfig();
     }
 }
