@@ -68,8 +68,12 @@ public final class Constants {
     // Manual control speeds
     public static final double kDefaultLiftSpeed = 0.3;
     public static final double kDefaultGantrySpeed = 0.2;
-  }
 
+    // Limit switch ports
+    public static final int kGantryFrontSwitchPort = -1;
+    public static final int kGantryBackSwitchPort = -1;
+  }
+  
   public static final class ShooterConstants{
     public static final int kJawCanId = -1;
     public static final int kShooterCanId = -1;

@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.estimator.KalmanFilter;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -20,6 +21,10 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     private final RelativeEncoder m_liftEncoder = m_liftMotor.getEncoder();
     private final RelativeEncoder m_gantryEncoder = m_gantryMotor.getEncoder();
+
+    // Limit switches
+    private final DigitalInput m_gantryFrontSwitch = new DigitalInput(ElevatorConstants.kGantryFrontSwitchPort);
+    private final DigitalInput m_gantryBackSwitch = new DigitalInput(ElevatorConstants.kGantryBackSwitchPort);
 
     public ElevatorSubsystem() {
         m_liftMotor.configure(Configs.Elevator.liftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -50,4 +55,13 @@ public class ElevatorSubsystem extends SubsystemBase{
             () -> m_gantryMotor.set(-ElevatorConstants.kDefaultGantrySpeed), 
             () -> m_gantryMotor.set(0.0));
     }
+
+    public Boolean getGantryFrontSwitch() {
+        return !m_gantryFrontSwitch.get();
+    }
+
+    public Boolean getGantryBackSwitch() {
+        return !m_gantryBackSwitch.get();
+    }
+
 }

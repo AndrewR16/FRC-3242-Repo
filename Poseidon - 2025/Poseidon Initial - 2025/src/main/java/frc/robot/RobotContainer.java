@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -22,6 +23,10 @@ public class RobotContainer {
     
     // The driver's controller
     CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
+
+    // Triggers
+    private final Trigger m_gantryForward = new Trigger(m_robotElevator::getGantryFrontSwitch);
+    private final Trigger m_gantryBack = new Trigger(m_robotElevator::getGantryBackSwitch);
 
     public RobotContainer() {
         configureBindings();
@@ -46,8 +51,8 @@ public class RobotContainer {
         m_driverController.leftBumper().whileTrue(m_robotElevator.elevatorDownCommand());
 
         // Gantry forward and backward (Right and left on D-pad)
-        m_driverController.povRight().whileTrue(m_robotElevator.gantryForwardCommand());
-        m_driverController.povLeft().whileTrue(m_robotElevator.gantryBackwardCommand());
+        m_driverController.povRight().and(m_gantryForward.negate()).whileTrue(m_robotElevator.gantryForwardCommand());
+        m_driverController.povLeft().and(m_gantryBack.negate()).whileTrue(m_robotElevator.gantryBackwardCommand());
 
         //Shooter out and in (Right and Left Triggers)
         m_driverController.rightTrigger().whileTrue(m_robotShooter.shooterOutCommand());
@@ -56,6 +61,9 @@ public class RobotContainer {
         // Shooter open and close (Up and Down on D-pad)
         m_driverController.povUp().whileTrue(m_robotShooter.jawOpenCommand());
         m_driverController.povDown().whileTrue(m_robotShooter.jawCloseCommand());
+
+        // Stop gantry movement
+        m_gantryForward.or(m_gantryBack).onTrue(m_robotElevator.runOnce(Commands::none));
     }
 
     public Command getAutonomousCommand() {
