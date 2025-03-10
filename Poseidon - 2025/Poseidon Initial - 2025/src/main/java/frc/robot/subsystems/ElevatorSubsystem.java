@@ -8,6 +8,8 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,6 +28,10 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final DigitalInput m_gantryBackSwitch = new DigitalInput(ElevatorConstants.kGantryBackSwitchPort);
 
     // Closed loop control
+    private final ElevatorFeedforward m_elevatorFeedforward = new ElevatorFeedforward(0, 0, 0);
+    private final SimpleMotorFeedforward m_gantryFeedForward = new SimpleMotorFeedforward(0, 0);
+    
+    private final SparkClosedLoopController m_liftController = m_liftMotor.getClosedLoopController();
     private final SparkClosedLoopController m_gantryController = m_gantryMotor.getClosedLoopController();
     
     public ElevatorSubsystem() {
