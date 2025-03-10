@@ -75,7 +75,6 @@ public final class Configs {
                 .pid(0.1, 0, 0)
                 .outputRange(-1, 1);
 
-
             gantryConfig
                 .idleMode(IdleMode.kBrake);
             gantryConfig.encoder
@@ -85,7 +84,9 @@ public final class Configs {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
                 .outputRange(-1, 1);
-        
+            gantryConfig.closedLoop.maxMotion
+                .maxVelocity(2)
+                .maxAcceleration(2);
         }                
     }
 
