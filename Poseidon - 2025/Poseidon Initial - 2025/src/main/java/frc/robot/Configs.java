@@ -19,7 +19,7 @@ public final class Configs {
             double drivingVelocityFeedForward = 1 / ModuleConstants.kDriveWheelFreeSpeedRps;
 
             drivingConfig
-                    .idleMode(IdleMode.kBrake)
+                    .idleMode(IdleMode.kCoast)
                     .smartCurrentLimit(50);
             drivingConfig.encoder
                     .positionConversionFactor(drivingFactor) // meters
@@ -32,7 +32,7 @@ public final class Configs {
                     .outputRange(-1, 1);
 
             turningConfig
-                    .idleMode(IdleMode.kBrake)
+                    .idleMode(IdleMode.kCoast)
                     .smartCurrentLimit(20);
             turningConfig.absoluteEncoder
                     // Invert the turning encoder, since the output shaft rotates in the opposite
@@ -65,11 +65,22 @@ public final class Configs {
 
             gantryConfig
                 .idleMode(IdleMode.kBrake);
+            // gantryConfig.encoder
+            //     .positionConversionFactor(0.05);
+        
         }                
     }
 
     public static final class Shooter{
         public static final SparkMaxConfig jawConfig = new SparkMaxConfig();
         public static final SparkMaxConfig shooterConfig = new SparkMaxConfig();
+
+        static {
+            jawConfig
+                .idleMode(IdleMode.kBrake);
+
+            shooterConfig
+                .idleMode(IdleMode.kCoast);
+        }
     }
 }
