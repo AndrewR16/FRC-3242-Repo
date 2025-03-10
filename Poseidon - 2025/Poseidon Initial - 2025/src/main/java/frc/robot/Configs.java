@@ -62,11 +62,15 @@ public final class Configs {
         static {
             liftConfig
                 .idleMode(IdleMode.kBrake);
-
             gantryConfig
                 .idleMode(IdleMode.kBrake);
-            // gantryConfig.encoder
-            //     .positionConversionFactor(0.05);
+            gantryConfig.encoder
+                .positionConversionFactor(0.05)
+                .velocityConversionFactor(0.05 / 60.0);
+            gantryConfig.closedLoop
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(0.1, 0, 0)
+                .outputRange(-1, 1);
         
         }                
     }
