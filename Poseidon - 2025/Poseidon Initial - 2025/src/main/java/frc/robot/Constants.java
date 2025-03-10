@@ -62,26 +62,29 @@ public final class Constants {
 
   public static final class ElevatorConstants{
     // Can Ids
-    // TODO: Adjust can ids
     public static final int kLiftCanId = 9;
     public static final int kGantryCanId = 10;
 
-    // Manual control speeds
+    // Default motor speeds
     public static final double kDefaultLiftSpeed = 0.3;
     public static final double kDefaultGantrySpeed = 0.1;
 
     // Limit switch ports
-    // TODO: Adjust switch ports
     public static final int kGantryFrontSwitchPort = 0;
     public static final int kGantryBackSwitchPort = 9;
     public static final int kLiftSwitchPort = 8;
+
+    // Motor reductions
+    public static final double kLiftMotorReduction = 36.0;
+    public static final double kGantryMotorReduction = 20.0;
   }
   
   public static final class ShooterConstants{
-    // TODO: Adjust can ids
+    // Can ids
     public static final int kJawCanId = 11;
     public static final int kShooterCanId = 12;
 
+    // Default motor speeds
     public static final double kDefaultJawSpeed = 0.2;
     public static final double kDefaultShooterInSpeed = 0.3;
     public static final double kDefaultShooterOutSpeed = 0.4;
