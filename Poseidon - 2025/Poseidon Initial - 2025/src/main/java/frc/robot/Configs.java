@@ -4,6 +4,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ModuleConstants;
 
 public final class Configs {
@@ -60,13 +61,26 @@ public final class Configs {
         public static final SparkMaxConfig gantryConfig = new SparkMaxConfig();
         
         static {
+            // TODO: Adjust conversion factors
+            double liftFactor = 1 / ElevatorConstants.kLiftMotorReduction;
+            double gantryFactor = 1 / ElevatorConstants.kGantryMotorReduction;
+
             liftConfig
                 .idleMode(IdleMode.kBrake);
+            liftConfig.encoder
+                .positionConversionFactor(liftFactor)
+                .velocityConversionFactor(liftFactor / 60);
+            liftConfig.closedLoop
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(0.1, 0, 0)
+                .outputRange(-1, 1);
+
+
             gantryConfig
                 .idleMode(IdleMode.kBrake);
             gantryConfig.encoder
-                .positionConversionFactor(0.05)
-                .velocityConversionFactor(0.05 / 60.0);
+                .positionConversionFactor(gantryFactor)
+                .velocityConversionFactor(gantryFactor / 60.0);
             gantryConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
