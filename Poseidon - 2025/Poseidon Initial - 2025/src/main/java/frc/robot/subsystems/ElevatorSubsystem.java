@@ -34,7 +34,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     // Closed loop control
     private final ElevatorFeedforward m_elevatorFeedforward = new ElevatorFeedforward(0, 0, 0);
-    private final SimpleMotorFeedforward m_gantryFeedForward = new SimpleMotorFeedforward(0, 0);
+    private final SimpleMotorFeedforward m_gantryFeedForward = new SimpleMotorFeedforward(0.37489, 0.80445, 0.056019);
     
     private final SparkClosedLoopController m_liftController = m_liftMotor.getClosedLoopController();
     private final SparkClosedLoopController m_gantryController = m_gantryMotor.getClosedLoopController();
