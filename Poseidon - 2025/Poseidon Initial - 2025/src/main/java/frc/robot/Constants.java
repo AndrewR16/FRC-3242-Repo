@@ -138,7 +138,7 @@ public final class Constants {
   }
 
   public static final class SensorConstants {
-    public static final int kGyroDeviceId = 9;
+    public static final int kGyroDeviceId = 13;
   }
 
   public static final class AutoConstants {
