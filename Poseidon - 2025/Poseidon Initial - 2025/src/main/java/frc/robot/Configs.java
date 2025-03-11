@@ -65,11 +65,12 @@ public final class Configs {
             double liftFactor = 1 / ElevatorConstants.kLiftMotorReduction;
             double gantryFactor = 1 / ElevatorConstants.kGantryMotorReduction;
 
+            // TODO: Adjust pid values
             liftConfig
                 .idleMode(IdleMode.kBrake);
             liftConfig.encoder
                 .positionConversionFactor(liftFactor)
-                .velocityConversionFactor(liftFactor / 60);
+                .velocityConversionFactor(liftFactor / 60.0);
             liftConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
@@ -84,9 +85,6 @@ public final class Configs {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
                 .outputRange(-1, 1);
-            gantryConfig.closedLoop.maxMotion
-                .maxVelocity(2)
-                .maxAcceleration(2);
         }                
     }
 
@@ -95,11 +93,32 @@ public final class Configs {
         public static final SparkMaxConfig shooterConfig = new SparkMaxConfig();
 
         static {
+            // TODO: Adjust conversion factors
+            double jawFactor = 2 * Math.PI;
+            double shooterFactor = 1;
+            
+            // TODO: Adjust pid values
+            // TODO: Configure encoder type
             jawConfig
                 .idleMode(IdleMode.kBrake);
+            jawConfig.encoder
+                .positionConversionFactor(jawFactor) // radians
+                .velocityConversionFactor(jawFactor / 60.0); // radians per second
+            jawConfig.closedLoop
+                // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(0.1, 0, 0)
+                .outputRange(-1, 1);
 
             shooterConfig
                 .idleMode(IdleMode.kCoast);
+            shooterConfig.encoder
+                .positionConversionFactor(shooterFactor)
+                .velocityConversionFactor(shooterFactor / 60.0);
+            shooterConfig.closedLoop
+                // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(0.1, 0, 0)
+                .outputRange(-1, 1);
+
         }
     }
 }
