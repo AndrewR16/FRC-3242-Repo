@@ -92,7 +92,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     // System identification methods
     public void runVolts(double volts) {
-        m_liftMotor.setVoltage(volts); // Set up for lift
+        m_gantryMotor.setVoltage(volts); // Set up for gantry
     }    
     
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
