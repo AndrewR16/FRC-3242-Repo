@@ -76,6 +76,9 @@ public final class Configs {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
                 .outputRange(-1, 1);
+            liftConfig.signals
+                .primaryEncoderPositionAlwaysOn(true)
+                .primaryEncoderVelocityAlwaysOn(true);
 
             gantryConfig
                 .idleMode(IdleMode.kBrake);
@@ -87,6 +90,9 @@ public final class Configs {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
                 .outputRange(-1, 1);
+            gantryConfig.signals
+                .primaryEncoderPositionAlwaysOn(true)
+                .primaryEncoderVelocityAlwaysOn(true);
         }                
     }
 
