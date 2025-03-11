@@ -60,7 +60,7 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
   }
 
-  public static final class ElevatorConstants{
+  public static final class ElevatorConstants {
     // Can Ids
     public static final int kLiftCanId = 9;
     public static final int kGantryCanId = 10;
@@ -79,6 +79,22 @@ public final class Constants {
     public static final double kGantryMotorReduction = 20.0;
   }
   
+  public static final class ElevatorSetpoints {
+    // Lowest point of the elevator
+    public static final double kLowest = 0.0;
+    
+    // TODO: Adjust setpoint values
+    // Reef setpoints (inches from bottom setpoint)
+    public static final double kLevel1 = 10.0;
+    public static final double kLevel2 = 20.0;
+    public static final double kLevel3 = 30.0;
+    public static final double kLevel4 = 40.0;
+
+    // Gantry setpoints
+    public static final double kGantryForward = 10.0;
+    public static final double kGantryBackward = 0.0;
+  }
+  
   public static final class ShooterConstants{
     // Can ids
     public static final int kJawCanId = 11;
@@ -88,6 +104,15 @@ public final class Constants {
     public static final double kDefaultJawSpeed = 0.2;
     public static final double kDefaultShooterInSpeed = 0.3;
     public static final double kDefaultShooterOutSpeed = 0.4;
+  }
+
+  public static final class ShooterSetpoints {
+    public static final double kClosed = 0;
+
+    // TODO: Adjust setpoint values
+    // Jaw angle to hold game piece
+    public static final double kCoral = Units.degreesToRadians(30.0);
+    public static final double kAlgae = Units.degreesToRadians(120.0);
   }
 
   public static final class ModuleConstants {
