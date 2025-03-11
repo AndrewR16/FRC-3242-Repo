@@ -69,6 +69,7 @@ public final class Configs {
             liftConfig
                 .idleMode(IdleMode.kBrake);
             liftConfig.encoder
+                .countsPerRevolution(12)
                 .positionConversionFactor(liftFactor)
                 .velocityConversionFactor(liftFactor / 60.0);
             liftConfig.closedLoop
@@ -79,6 +80,7 @@ public final class Configs {
             gantryConfig
                 .idleMode(IdleMode.kBrake);
             gantryConfig.encoder
+                .countsPerRevolution(12)
                 .positionConversionFactor(gantryFactor)
                 .velocityConversionFactor(gantryFactor / 60.0);
             gantryConfig.closedLoop
