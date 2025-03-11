@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
@@ -58,6 +59,8 @@ public class RobotContainer {
                 }
 
     private void configureBindings() {
+        sysIdBindings();
+        
         // Lift up and down (Right and Left Bumpers)
         m_driverController.rightBumper().whileTrue(m_robotElevator.elevatorUpCommand());
         m_driverController.leftBumper().whileTrue(m_robotElevator.elevatorDownCommand());
@@ -76,6 +79,13 @@ public class RobotContainer {
         
         // Stop gantry movement
         m_gantryForward.or(m_gantryBack).onTrue(m_robotElevator.runOnce(Commands::none));
+    }
+
+    private void sysIdBindings() {
+        m_driverController.y().whileTrue(m_robotElevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        m_driverController.b().whileTrue(m_robotElevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        m_driverController.a().whileTrue(m_robotElevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        m_driverController.x().whileTrue(m_robotElevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     public Command getAutonomousCommand() {
