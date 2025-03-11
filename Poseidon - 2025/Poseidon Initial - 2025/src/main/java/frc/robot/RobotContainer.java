@@ -45,25 +45,25 @@ public class RobotContainer {
         configureBindings();
         
         // Configure default commands
-        m_robotDrive.setDefaultCommand(
-            // The left stick controls translation of the robot.
-            // Turning is controlled by the X axis of the right stick.
-            new RunCommand(
-                () -> m_robotDrive.drive(
-                    -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
-                    -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
-                    -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-                    true),
-                    m_robotDrive));
+        //! m_robotDrive.setDefaultCommand(
+        //     // The left stick controls translation of the robot.
+        //     // Turning is controlled by the X axis of the right stick.
+        //     new RunCommand(
+        //         () -> m_robotDrive.drive(
+        //             -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
+        //             -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
+        //             -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
+        //             true),
+        //             m_robotDrive));
                     
-                }
+    }
 
     private void configureBindings() {
         sysIdBindings();
-        
-        // Lift up and down (Right and Left Bumpers)
-        m_driverController.rightBumper().whileTrue(m_robotElevator.elevatorUpCommand());
-        m_driverController.leftBumper().whileTrue(m_robotElevator.elevatorDownCommand());
+
+        //! Lift up and down (Right and Left Bumpers)
+        // m_driverController.rightBumper().whileTrue(m_robotElevator.elevatorUpCommand());
+        // m_driverController.leftBumper().whileTrue(m_robotElevator.elevatorDownCommand());
         
         // Gantry forward and backward (Right and left on D-pad)
         m_driverController.povRight().and(m_gantryForward.negate()).whileTrue(m_robotElevator.gantryForwardCommand());
