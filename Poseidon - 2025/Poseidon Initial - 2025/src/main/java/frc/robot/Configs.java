@@ -83,6 +83,7 @@ public final class Configs {
             gantryConfig
                 .idleMode(IdleMode.kBrake);
             gantryConfig.encoder
+                .inverted(true)
                 .countsPerRevolution(12)
                 .positionConversionFactor(gantryFactor)
                 .velocityConversionFactor(gantryFactor / 60.0);
