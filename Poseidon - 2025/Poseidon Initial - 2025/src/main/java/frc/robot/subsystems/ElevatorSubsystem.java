@@ -49,8 +49,8 @@ public class ElevatorSubsystem extends SubsystemBase{
     // Gantry motion profile
     private final Timer m_gantryProfileTimer = new Timer();
     private final ExponentialProfile m_gantryProfile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(1.4, ElevatorConstants.kGantryKv, ElevatorConstants.kGantryKa));
-    private ExponentialProfile.State m_initialSetpoint = new ExponentialProfile.State();
-    private ExponentialProfile.State m_previousSetpoint = new ExponentialProfile.State();
+    private ExponentialProfile.State m_gantryInitialSetpoint = new ExponentialProfile.State();
+    private ExponentialProfile.State m_gantryPreviousSetpoint = new ExponentialProfile.State();
     
     // Creates a system identification routine
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
@@ -78,19 +78,19 @@ public class ElevatorSubsystem extends SubsystemBase{
             () -> {
                 m_gantryProfileTimer.reset();
                 m_gantryProfileTimer.start();
-                m_previousSetpoint = m_initialSetpoint;
-                m_initialSetpoint = new ExponentialProfile.State(m_gantryEncoder.getPosition(), 0);
+                m_gantryPreviousSetpoint = m_gantryInitialSetpoint;
+                m_gantryInitialSetpoint = new ExponentialProfile.State(m_gantryEncoder.getPosition(), 0);
             },
             () -> {
-            var nextSetpoint = m_gantryProfile.calculate(m_gantryProfileTimer.get(), m_initialSetpoint, goal);
+            var nextSetpoint = m_gantryProfile.calculate(m_gantryProfileTimer.get(), m_gantryInitialSetpoint, goal);
             
             m_gantryController.setReference(
                 nextSetpoint.position, 
                 ControlType.kPosition, 
                 ClosedLoopSlot.kSlot0,
-                m_gantryFeedForward.calculateWithVelocities(m_previousSetpoint.velocity, nextSetpoint.velocity));
+                m_gantryFeedForward.calculateWithVelocities(m_gantryPreviousSetpoint.velocity, nextSetpoint.velocity));
 
-            m_previousSetpoint = nextSetpoint;
+            m_gantryPreviousSetpoint = nextSetpoint;
             SmartDashboard.putNumber("Profile Position", nextSetpoint.position);
             SmartDashboard.putNumber("Profile Velocity", nextSetpoint.velocity);
         }).finallyDo(() -> m_gantryMotor.set(0.0));
