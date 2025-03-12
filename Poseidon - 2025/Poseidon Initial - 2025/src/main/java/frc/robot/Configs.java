@@ -67,6 +67,7 @@ public final class Configs {
 
             // TODO: Adjust pid values
             liftConfig
+                .inverted(true)
                 .idleMode(IdleMode.kBrake);
             liftConfig.encoder
                 .countsPerRevolution(12)
