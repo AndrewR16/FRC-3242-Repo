@@ -77,6 +77,12 @@ public final class Constants {
     // Motor reductions
     public static final double kLiftMotorReduction = 36.0;
     public static final double kGantryMotorReduction = 20.0;
+
+    // Feedforward values
+    // Gantry
+    public static final double kGantryKs = 0.37489;
+    public static final double kGantryKv = 0.9;
+    public static final double kGantryKa = 0.056019;
   }
   
   public static final class ElevatorSetpoints {
@@ -91,7 +97,7 @@ public final class Constants {
     public static final double kLevel4 = 40.0;
 
     // Gantry setpoints
-    public static final double kGantryForward = 10.0;
+    public static final double kGantryForward = 14.8;
     public static final double kGantryBackward = 0.0;
   }
   
