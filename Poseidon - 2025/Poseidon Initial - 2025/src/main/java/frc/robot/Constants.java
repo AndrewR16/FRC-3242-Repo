@@ -81,7 +81,7 @@ public final class Constants {
     // Feedforward values
     // Gantry
     public static final double kGantryKs = 0.37489;
-    public static final double kGantryKv = 0.9;
+    public static final double kGantryKv = 0.80445;
     public static final double kGantryKa = 0.056019;
   }
   
