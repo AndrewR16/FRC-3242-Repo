@@ -112,6 +112,8 @@ public final class Configs {
             jawConfig
                 .idleMode(IdleMode.kBrake);
             jawConfig.encoder
+                .inverted(true)
+                .countsPerRevolution(8192)
                 .positionConversionFactor(jawFactor) // radians
                 .velocityConversionFactor(jawFactor / 60.0); // radians per second
             jawConfig.closedLoop
