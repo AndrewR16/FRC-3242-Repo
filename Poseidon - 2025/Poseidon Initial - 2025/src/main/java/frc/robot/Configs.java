@@ -120,6 +120,9 @@ public final class Configs {
                 // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
                 .outputRange(-1, 1);
+            jawConfig.signals
+                .primaryEncoderPositionAlwaysOn(true)
+                .primaryEncoderVelocityAlwaysOn(true);
 
             shooterConfig
                 .idleMode(IdleMode.kCoast);
@@ -130,6 +133,9 @@ public final class Configs {
                 // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(0.1, 0, 0)
                 .outputRange(-1, 1);
+            shooterConfig.signals
+                .primaryEncoderPositionAlwaysOn(true)
+                .primaryEncoderVelocityAlwaysOn(true);
 
         }
     }
