@@ -40,7 +40,10 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     // Feed forward control
     private final ElevatorFeedforward m_elevatorFeedforward = new ElevatorFeedforward(0, 0, 0);
-    private final SimpleMotorFeedforward m_gantryFeedForward = new SimpleMotorFeedforward(ElevatorConstants.kGantryKs, ElevatorConstants.kGantryKv, ElevatorConstants.kGantryKa);
+    private final SimpleMotorFeedforward m_gantryFeedForward = new SimpleMotorFeedforward(
+        ElevatorConstants.kGantryKs, 
+        ElevatorConstants.kGantryKv, 
+        ElevatorConstants.kGantryKa);
 
     // Closed loop control
     private final SparkClosedLoopController m_liftController = m_liftMotor.getClosedLoopController();
@@ -48,7 +51,8 @@ public class ElevatorSubsystem extends SubsystemBase{
     
     // Gantry motion profile
     private final Timer m_gantryProfileTimer = new Timer();
-    private final ExponentialProfile m_gantryProfile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(1.4, ElevatorConstants.kGantryKv, ElevatorConstants.kGantryKa));
+    private final ExponentialProfile m_gantryProfile = new ExponentialProfile(
+        ExponentialProfile.Constraints.fromCharacteristics(1.4, ElevatorConstants.kGantryKv, ElevatorConstants.kGantryKa));
     private ExponentialProfile.State m_gantryInitialSetpoint = new ExponentialProfile.State();
     private ExponentialProfile.State m_gantryPreviousSetpoint = new ExponentialProfile.State();
     
