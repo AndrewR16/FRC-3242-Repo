@@ -82,6 +82,11 @@ public class ElevatorSubsystem extends SubsystemBase{
             () -> m_gantryMotor.set(0.0));
     }
 
+    // Reset encoder position
+    public Command resetGantryEncoder(double position) {
+        return this.runOnce(() -> m_gantryEncoder.setPosition(position));
+    }
+    
     public Boolean getGantryFrontSwitch() {
         return !m_gantryFrontSwitch.get();
     }
