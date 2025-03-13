@@ -90,8 +90,7 @@ public final class Configs {
                 .velocityConversionFactor(gantryFactor / 60.0);
             gantryConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(0, 0, 0)
-                // .pid(1.8548, 0, 0)
+                .pid(1.8548, 0, 0)
                 .outputRange(-1, 1);
             gantryConfig.signals
                 .primaryEncoderPositionAlwaysOn(true)
