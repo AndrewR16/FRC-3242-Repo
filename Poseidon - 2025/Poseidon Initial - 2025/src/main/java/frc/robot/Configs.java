@@ -111,6 +111,7 @@ public final class Configs {
             // TODO: Adjust pid values
             // TODO: Configure encoder type
             jawConfig
+                .inverted(true)
                 .idleMode(IdleMode.kBrake);
             jawConfig.encoder
                 .inverted(true)
