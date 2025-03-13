@@ -82,8 +82,8 @@ public class ElevatorSubsystem extends SubsystemBase{
             () -> {
                 m_gantryProfileTimer.reset();
                 m_gantryProfileTimer.start();
-                m_gantryPreviousSetpoint = m_gantryInitialSetpoint;
                 m_gantryInitialSetpoint = new ExponentialProfile.State(m_gantryEncoder.getPosition(), 0);
+                m_gantryPreviousSetpoint = m_gantryInitialSetpoint;
             },
             () -> {
             var nextSetpoint = m_gantryProfile.calculate(m_gantryProfileTimer.get(), m_gantryInitialSetpoint, goal);
@@ -95,22 +95,22 @@ public class ElevatorSubsystem extends SubsystemBase{
                 m_gantryFeedForward.calculateWithVelocities(m_gantryPreviousSetpoint.velocity, nextSetpoint.velocity));
 
             m_gantryPreviousSetpoint = nextSetpoint;
-            SmartDashboard.putNumber("Profile Position", nextSetpoint.position);
-            SmartDashboard.putNumber("Profile Velocity", nextSetpoint.velocity);
+            SmartDashboard.putNumber("Gantry Profile Position", nextSetpoint.position);
+            SmartDashboard.putNumber("Gantry Profile Velocity", nextSetpoint.velocity);
         }).finallyDo(() -> m_gantryMotor.set(0.0));
     }
     
     // Manual command methods
     public Command elevatorUpCommand() {
         return this.startEnd(
-            () -> m_liftMotor.set(ElevatorConstants.kDefaultLiftSpeed), 
-            () -> m_liftMotor.set(0.0));
+            () -> m_liftMotor.set(0.4), 
+            () -> m_liftMotor.setVoltage(1.5));
     }
 
     public Command elevatorDownCommand() {
         return this.startEnd(
-            () -> m_liftMotor.set(-ElevatorConstants.kDefaultLiftSpeed), 
-            () -> m_liftMotor.set(0.0));
+            () -> m_liftMotor.set(-0.05),
+            () -> m_liftMotor.setVoltage(1.5));
     }
 
     public Command gantryForwardCommand() {
