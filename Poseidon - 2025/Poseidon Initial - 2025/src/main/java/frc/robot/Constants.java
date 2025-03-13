@@ -117,8 +117,8 @@ public final class Constants {
 
     // TODO: Adjust setpoint values
     // Jaw angle to hold game piece
-    public static final double kCoral = Units.degreesToRadians(30.0);
-    public static final double kAlgae = Units.degreesToRadians(120.0);
+    public static final double kCoral = 0.25;
+    public static final double kAlgae = 1.3;
   }
 
   public static final class ModuleConstants {
