@@ -35,6 +35,9 @@ public class RobotContainer {
     private final ElevatorSubsystem m_robotElevator = new ElevatorSubsystem();
     private final ShooterSubsystem m_robotShooter = new ShooterSubsystem();
     
+    // The robot's USB camera
+    private final Camera m_robotCamera = new Camera();
+    
     // The driver's controller
     CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
     
