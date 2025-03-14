@@ -119,8 +119,8 @@ public final class Configs {
                 .velocityConversionFactor(jawFactor / 60.0); // radians per second
             jawConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(0.1, 0, 0)
-                .outputRange(-1, 1);
+                .pid(1, 0, 0)
+                .outputRange(-0.5, 0.5);
             jawConfig.signals
                 .primaryEncoderPositionAlwaysOn(true)
                 .primaryEncoderVelocityAlwaysOn(true);
@@ -132,7 +132,7 @@ public final class Configs {
                 .velocityConversionFactor(shooterFactor / 60.0);
             shooterConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(0.1, 0, 0)
+                .pid(0.0, 0, 0)
                 .outputRange(-1, 1);
             shooterConfig.signals
                 .primaryEncoderPositionAlwaysOn(true)
