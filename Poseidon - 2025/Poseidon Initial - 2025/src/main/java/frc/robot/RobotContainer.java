@@ -58,23 +58,23 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        //! sysIdBindings();
+        // sysIdBindings();
 
-        //! Lift up and down (Right and Left Bumpers)
-        // m_driverController.rightBumper().whileTrue(m_robotElevator.elevatorUpCommand());
-        // m_driverController.leftBumper().whileTrue(m_robotElevator.elevatorDownCommand());
+        // Lift up and down (Right and Left Bumpers)
+        m_driverController.rightBumper().whileTrue(m_robotElevator.elevatorUpCommand());
+        m_driverController.leftBumper().whileTrue(m_robotElevator.elevatorDownCommand());
         
         // Gantry forward and backward (Right and left on D-pad)
         m_driverController.povRight().and(m_gantryForward.negate()).whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryForward));
         m_driverController.povLeft().and(m_gantryBack.negate()).whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryBackward));
         
-        //! Shooter out and in (Right and Left Triggers)
-        // m_driverController.rightTrigger().whileTrue(m_robotShooter.shooterOutCommand());
-        // m_driverController.leftTrigger().whileTrue(m_robotShooter.shooterInCommand());
+        // Shooter out and in (Right and Left Triggers)
+        m_driverController.rightTrigger().whileTrue(m_robotShooter.shooterOutCommand());
+        m_driverController.leftTrigger().whileTrue(m_robotShooter.shooterInCommand());
         
-        //! Shooter open and close (Up and Down on D-pad)
-        // m_driverController.povUp().whileTrue(m_robotShooter.jawOpenCommand());
-        // m_driverController.povDown().whileTrue(m_robotShooter.jawCloseCommand());
+        // Shooter open and close (Up and Down on D-pad)
+        m_driverController.povUp().whileTrue(m_robotShooter.jawOpenCommand());
+        m_driverController.povDown().whileTrue(m_robotShooter.jawCloseCommand());
         
         // Stop gantry movement
         m_gantryForward.or(m_gantryBack).onTrue(m_robotElevator.runOnce(Commands::none));
@@ -83,10 +83,10 @@ public class RobotContainer {
     }
 
     private void sysIdBindings() {
-        m_driverController.y().whileTrue(m_robotElevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        m_driverController.b().whileTrue(m_robotElevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        m_driverController.a().whileTrue(m_robotElevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        m_driverController.x().whileTrue(m_robotElevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        m_driverController.y().whileTrue(m_robotShooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        m_driverController.b().whileTrue(m_robotShooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        m_driverController.a().whileTrue(m_robotShooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        m_driverController.x().whileTrue(m_robotShooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     public Command getAutonomousCommand() {
