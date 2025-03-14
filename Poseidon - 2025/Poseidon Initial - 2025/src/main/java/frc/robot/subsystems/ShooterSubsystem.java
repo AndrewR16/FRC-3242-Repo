@@ -1,9 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Volts;
-
-import org.littletonrobotics.junction.Logger;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -19,7 +15,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Configs;
 import frc.robot.Constants.ShooterConstants;
 
@@ -48,19 +43,6 @@ public class ShooterSubsystem extends SubsystemBase{
     private TrapezoidProfile.State m_jawInitialSetpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State m_jawPreviousSetpoint = new TrapezoidProfile.State();
 
-    // Creates a system identification routine
-    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
-        new SysIdRoutine.Config(
-          null, null, null,
-          (state) -> Logger.recordOutput("SysIdTestState", state.toString())
-        ),
-        new SysIdRoutine.Mechanism(
-          (voltage) -> this.runVolts(voltage.in(Volts)),
-          null, // No log consumer, since data is recorded by URCL
-          this
-        )
-      );
-    
     public ShooterSubsystem() {
         m_jawMotor.configure(Configs.Shooter.jawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_shooterMotor.configure(Configs.Shooter.shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -119,18 +101,4 @@ public class ShooterSubsystem extends SubsystemBase{
             () -> m_shooterMotor.set(ShooterConstants.kDefaultShooterOutSpeed),
             () -> m_shooterMotor.set(0.0));
     }
-
-    // System identification methods
-    public void runVolts(double volts) {
-        m_jawMotor.setVoltage(volts); // Set up for jaw open and close
-    }    
-    
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.quasistatic(direction);
-    }
-
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.dynamic(direction);
-      }
-    
 }

@@ -1,9 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Volts;
-
-import org.littletonrobotics.junction.Logger;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -21,7 +17,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Configs;
 import frc.robot.Constants.ElevatorConstants;
 
@@ -56,19 +51,6 @@ public class ElevatorSubsystem extends SubsystemBase{
     private ExponentialProfile.State m_gantryInitialSetpoint = new ExponentialProfile.State();
     private ExponentialProfile.State m_gantryPreviousSetpoint = new ExponentialProfile.State();
     
-    // Creates a system identification routine
-    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
-        new SysIdRoutine.Config(
-          null, null, null,
-          (state) -> Logger.recordOutput("SysIdTestState", state.toString())
-        ),
-        new SysIdRoutine.Mechanism(
-          (voltage) -> this.runVolts(voltage.in(Volts)),
-          null, // No log consumer, since data is recorded by URCL
-          this
-        )
-      );
-
     public ElevatorSubsystem() {
         m_liftMotor.configure(Configs.Elevator.liftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_gantryMotor.configure(Configs.Elevator.gantryConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -137,17 +119,4 @@ public class ElevatorSubsystem extends SubsystemBase{
     public Boolean getGantryBackSwitch() {
         return !m_gantryBackSwitch.get();
     }
-
-    // System identification methods
-    public void runVolts(double volts) {
-        m_gantryMotor.setVoltage(volts); // Set up for gantry
-    }    
-    
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.quasistatic(direction);
-    }
-
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.dynamic(direction);
-      }
 }
