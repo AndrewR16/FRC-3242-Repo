@@ -111,6 +111,12 @@ public final class Constants {
     public static final double kDefaultCloseJawSpeed = -0.15;
     public static final double kDefaultShooterInSpeed = 0.4;
     public static final double kDefaultShooterOutSpeed = 0.4;
+
+    // Feedforward values
+    public static final double kJawKs = 2.9;
+    public static final double kJawKv = 1.25;
+    public static final double kJawKa = 0.05;
+
   }
 
   public static final class ShooterSetpoints {
