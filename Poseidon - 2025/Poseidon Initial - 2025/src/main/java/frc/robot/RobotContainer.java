@@ -59,24 +59,28 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // Lift up and down (Right and Left Bumpers)
-        m_driverController.rightBumper().whileTrue(m_robotElevator.elevatorUpCommand());
-        m_driverController.leftBumper().whileTrue(m_robotElevator.elevatorDownCommand());
+        // Lift up and down (Y and A Buttons)
+        m_driverController.y().whileTrue(m_robotElevator.elevatorUpCommand());
+        m_driverController.a().whileTrue(m_robotElevator.elevatorDownCommand());
         
-        // Gantry forward and backward (Right and left on D-pad)
-        m_driverController.povRight().and(m_gantryForward.negate()).whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryForward));
-        m_driverController.povLeft().and(m_gantryBack.negate()).whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryBackward));
+        // Gantry forward and backward (D-pad Up and Down)
+        m_driverController.povUp().and(m_gantryForward.negate()) // Gantry must not be contacting the front limit switch
+            .whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryForward));
+        m_driverController.povDown().and(m_gantryBack.negate()) // Gantry must not be contacting the back limit switch
+            .whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryBackward));
         
         // Shooter out and in (Right and Left Triggers)
         m_driverController.rightTrigger().whileTrue(m_robotShooter.shooterOutCommand());
         m_driverController.leftTrigger().whileTrue(m_robotShooter.shooterInCommand());
         
-        // Shooter open and close (Up and Down on D-pad)
-        m_driverController.povUp().whileTrue(m_robotShooter.jawOpenCommand());
-        m_driverController.povDown().whileTrue(m_robotShooter.jawCloseCommand());
+        // Shooter open and close (Right and Left Bumpers)
+        m_driverController.rightBumper().whileTrue(m_robotShooter.jawOpenCommand());
+        m_driverController.leftBumper().whileTrue(m_robotShooter.jawCloseCommand());
         
-        // Stop gantry movement
+        // Stop gantry movement (Gantry Limit Switches)
         m_gantryForward.or(m_gantryBack).onTrue(m_robotElevator.runOnce(Commands::none));
+
+        // Reset encoder positions (Gantry Limit Switches)
         m_gantryBack.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryBackward));
         m_gantryForward.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryForward));
     }
