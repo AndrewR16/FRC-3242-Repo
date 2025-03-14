@@ -43,19 +43,19 @@ public class ShooterSubsystem extends SubsystemBase{
 
     public Command jawOpenCommand() {
         return this.startEnd(
-            () -> m_jawMotor.set(ShooterConstants.kDefaultJawSpeed),
+            () -> m_jawMotor.set(ShooterConstants.kDefaultOpenJawSpeed),
             () -> m_jawMotor.set(0.0));
     }
 
     public Command jawCloseCommand() {
         return this.startEnd(
-            () -> m_jawMotor.set(-ShooterConstants.kDefaultJawSpeed),
+            () -> m_jawMotor.set(ShooterConstants.kDefaultCloseJawSpeed),
             () -> m_jawMotor.set(0.0));
     }
 
     public Command shooterInCommand() {
         return this.startEnd(
-            () -> m_shooterMotor.set(ShooterConstants.kDefaultShooterInSpeed),
+            () -> m_shooterMotor.set(-ShooterConstants.kDefaultShooterInSpeed),
             () -> m_shooterMotor.set(0.0));
     }
 
