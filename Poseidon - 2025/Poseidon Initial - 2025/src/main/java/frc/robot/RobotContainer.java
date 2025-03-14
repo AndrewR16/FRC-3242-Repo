@@ -79,6 +79,7 @@ public class RobotContainer {
         // Stop gantry movement
         m_gantryForward.or(m_gantryBack).onTrue(m_robotElevator.runOnce(Commands::none));
         m_gantryBack.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryBackward));
+        m_gantryForward.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryForward));
     }
 
     private void sysIdBindings() {
