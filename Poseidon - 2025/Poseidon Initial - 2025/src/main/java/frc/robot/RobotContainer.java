@@ -94,9 +94,9 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return Commands.sequence(
-            Commands.runOnce(() -> m_robotDrive.drive(0.3, 0, 0, true), m_robotDrive),
+            Commands.runOnce(() -> m_robotDrive.drive(-0.3, 0, 0, false), m_robotDrive),
             Commands.waitSeconds(2.0),
-            Commands.runOnce(() -> m_robotDrive.drive(0, 0, 0, true), m_robotDrive)
+            Commands.runOnce(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive)
         );
         
     //     // Create config for trajectory
