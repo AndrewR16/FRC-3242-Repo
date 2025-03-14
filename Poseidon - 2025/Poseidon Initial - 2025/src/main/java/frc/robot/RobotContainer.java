@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -44,6 +45,7 @@ public class RobotContainer {
     // Triggers
     private final Trigger m_gantryForward = new Trigger(m_robotElevator::getGantryFrontSwitch);
     private final Trigger m_gantryBack = new Trigger(m_robotElevator::getGantryBackSwitch);
+    private final Trigger m_elevatorBottom = new Trigger(m_robotElevator::getElevatorBottomSwitch);
     
     public RobotContainer() {
         configureBindings();
@@ -68,7 +70,8 @@ public class RobotContainer {
     private void configureBindings() {
         // Lift up and down (Y and A Buttons)
         m_driverController.y().whileTrue(m_robotElevator.elevatorUpCommand());
-        m_driverController.a().whileTrue(m_robotElevator.elevatorDownCommand());
+        m_driverController.a().and(m_elevatorBottom.negate()).whileTrue(m_robotElevator.elevatorDownCommand());
+        // m_driverController.a().whileTrue(m_robotElevator.elevatorDownCommand());
         
         // Gantry forward and backward (D-pad Up and Down)
         m_driverController.povUp().and(m_gantryForward.negate()) // Gantry must not be contacting the front limit switch
@@ -86,6 +89,8 @@ public class RobotContainer {
         
         // Stop gantry movement (Gantry Limit Switches)
         m_gantryForward.or(m_gantryBack).onTrue(m_robotElevator.runOnce(Commands::none));
+
+        m_elevatorBottom.onTrue(m_robotElevator.runOnce(Commands::none));
 
         // Reset encoder positions (Gantry Limit Switches)
         m_gantryBack.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryBackward));

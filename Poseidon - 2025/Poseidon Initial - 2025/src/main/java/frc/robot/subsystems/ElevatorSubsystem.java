@@ -32,6 +32,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     // Limit switches
     private final DigitalInput m_gantryFrontSwitch = new DigitalInput(ElevatorConstants.kGantryFrontSwitchPort);
     private final DigitalInput m_gantryBackSwitch = new DigitalInput(ElevatorConstants.kGantryBackSwitchPort);
+    private final DigitalInput m_elevatorBottomLimitSwitch = new DigitalInput(6);
 
     // Feed forward control
     private final ElevatorFeedforward m_elevatorFeedforward = new ElevatorFeedforward(0, 0, 0);
@@ -85,7 +86,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     // Manual command methods
     public Command elevatorUpCommand() {
         return this.startEnd(
-            () -> m_liftMotor.set(0.4), 
+            () -> m_liftMotor.set(0.75), 
             () -> m_liftMotor.setVoltage(1.5));
     }
 
@@ -118,5 +119,9 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public Boolean getGantryBackSwitch() {
         return !m_gantryBackSwitch.get();
+    }
+
+    public Boolean getElevatorBottomSwitch() {
+        return !m_elevatorBottomLimitSwitch.get();
     }
 }
