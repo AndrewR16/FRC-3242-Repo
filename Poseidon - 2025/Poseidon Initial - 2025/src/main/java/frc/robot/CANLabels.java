@@ -3,7 +3,7 @@ package frc.robot;
 import java.util.HashMap;
 
 public class CANLabels {
-    public HashMap getLabels() {
+    public static HashMap<Integer, String> getLabels() {
         HashMap<Integer, String> sparkMap = new HashMap<Integer, String>();
         
         sparkMap.put(1, "Rear Left Turning");
