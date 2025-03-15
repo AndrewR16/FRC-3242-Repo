@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
@@ -72,22 +73,21 @@ public class RobotContainer {
                     -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
                     true),
                     m_robotDrive));
-                    
     }
 
     private void configureBindings() {
         // Lift up and down (Y and A Buttons)
-        m_driverController.y()
+        m_driverController.y().and(m_elevatorTopTrigger.negate())
             .whileTrue(m_robotElevator.elevatorUpCommand());
         m_driverController.a().and(m_elevatorBottomTrigger.negate()) // Elevator must not be at the bottom
             .whileTrue(m_robotElevator.elevatorDownCommand());
         
         // Gantry forward and backward (D-pad Up and Down)
         m_driverController.povUp().and(m_gantryForwardTrigger.negate()) // Gantry must not be contacting the front limit switch
-            .whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryForward));
+            .whileTrue(m_robotElevator.gantryForwardCommand());
         m_driverController.povDown().and(m_gantryBackTrigger.negate()) // Gantry must not be contacting the back limit switch
-            .whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryBackward));
-        
+            .whileTrue(m_robotElevator.gantryBackwardCommand());
+
         // Shooter out and in (Right and Left Triggers)
         m_driverController.rightTrigger().whileTrue(m_robotShooter.shooterOutCommand());
         m_driverController.leftTrigger().whileTrue(m_robotShooter.shooterInCommand());
@@ -119,7 +119,8 @@ public class RobotContainer {
         return Commands.sequence(
             Commands.runOnce(() -> m_robotDrive.drive(-0.3, 0, 0, true), m_robotDrive),
             Commands.waitSeconds(2.0),
-            Commands.runOnce(() -> m_robotDrive.drive(0, 0, 0, true), m_robotDrive)
+            Commands.runOnce(() -> m_robotDrive.drive(0, 0, 0, true), m_robotDrive),
+            m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryForward)
         );
         
     //     // Create config for trajectory
