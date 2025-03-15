@@ -44,7 +44,7 @@ public class Robot extends LoggedRobot {
       Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
     }
 
-    Logger.registerURCL(URCL.startExternal());
+    Logger.registerURCL(URCL.startExternal(CANLabels.getLabels()));
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
   }
 
