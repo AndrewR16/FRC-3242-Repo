@@ -109,7 +109,7 @@ public final class Constants {
     // Default motor speeds
     public static final double kDefaultOpenJawSpeed = 0.5;
     public static final double kDefaultCloseJawSpeed = -0.15;
-    public static final double kDefaultShooterInSpeed = 0.4;
+    public static final double kDefaultShooterInSpeed = 0.6;
     public static final double kDefaultShooterOutSpeed = 0.7;
 
     // Feedforward values
