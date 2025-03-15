@@ -102,11 +102,11 @@ public class ShooterSubsystem extends SubsystemBase{
             () -> m_shooterMotor.set(0.0));
     }
 
-    public boolean isJawAtMax() {
+    public Boolean isJawAtMax() {
         return m_jawEncoder.getPosition() > 1.8;
     }
 
-    public boolean isJawAtMin() {
+    public Boolean isJawAtMin() {
         return m_jawEncoder.getPosition() < 0.05;
     }
 }
