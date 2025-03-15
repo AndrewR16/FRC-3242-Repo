@@ -110,7 +110,7 @@ public final class Constants {
     public static final double kDefaultOpenJawSpeed = 0.5;
     public static final double kDefaultCloseJawSpeed = -0.15;
     public static final double kDefaultShooterInSpeed = 0.6;
-    public static final double kDefaultShooterOutSpeed = 0.7;
+    public static final double kDefaultShooterOutSpeed = 0.85;
 
     // Feedforward values
     public static final double kJawKs = 2.9;
