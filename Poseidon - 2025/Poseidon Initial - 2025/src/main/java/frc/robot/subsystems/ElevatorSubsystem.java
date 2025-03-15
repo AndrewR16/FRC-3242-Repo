@@ -92,19 +92,19 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public Command elevatorDownCommand() {
         return this.startEnd(
-            () -> m_liftMotor.set(-0.05),
+            () -> m_liftMotor.set(-0.3),
             () -> m_liftMotor.setVoltage(1.5));
     }
 
     public Command gantryForwardCommand() {
         return this.startEnd(
-            () -> m_gantryMotor.set(ElevatorConstants.kDefaultGantrySpeed), 
+            () -> m_gantryMotor.set(0.4), 
             () -> m_gantryMotor.set(0.0));
     }
 
     public Command gantryBackwardCommand() {
         return this.startEnd(
-            () -> m_gantryMotor.set(-ElevatorConstants.kDefaultGantrySpeed), 
+            () -> m_gantryMotor.set(-0.4), 
             () -> m_gantryMotor.set(0.0));
     }
 
