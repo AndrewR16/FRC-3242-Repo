@@ -43,9 +43,17 @@ public class RobotContainer {
     CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
     
     // Triggers
-    private final Trigger m_gantryForward = new Trigger(m_robotElevator::getGantryFrontSwitch);
-    private final Trigger m_gantryBack = new Trigger(m_robotElevator::getGantryBackSwitch);
-    private final Trigger m_elevatorBottom = new Trigger(m_robotElevator::getElevatorBottomSwitch);
+    // Gantry triggers
+    private final Trigger m_gantryForwardTrigger = new Trigger(m_robotElevator::getGantryFrontSwitch);
+    private final Trigger m_gantryBackTrigger = new Trigger(m_robotElevator::getGantryBackSwitch);
+
+    // Elevator triggers
+    private final Trigger m_elevatorBottomTrigger = new Trigger(m_robotElevator::getElevatorBottomSwitch);
+    private final Trigger m_elevatorTopTrigger = new Trigger(m_robotElevator::isElevatorAtMax);
+    
+    // Jaw triggers
+    private final Trigger m_jawAtMaxPosTrigger = new Trigger(m_robotShooter::isJawAtMax);
+    private final Trigger m_jawAtMinPosTrigger = new Trigger(m_robotShooter::isJawAtMin);
     
     public RobotContainer() {
         configureBindings();
@@ -69,14 +77,15 @@ public class RobotContainer {
 
     private void configureBindings() {
         // Lift up and down (Y and A Buttons)
-        m_driverController.y().whileTrue(m_robotElevator.elevatorUpCommand());
-        m_driverController.a().and(m_elevatorBottom.negate()).whileTrue(m_robotElevator.elevatorDownCommand());
-        // m_driverController.a().whileTrue(m_robotElevator.elevatorDownCommand());
+        m_driverController.y()
+            .whileTrue(m_robotElevator.elevatorUpCommand());
+        m_driverController.a().and(m_elevatorBottomTrigger.negate()) // Elevator must not be at the bottom
+            .whileTrue(m_robotElevator.elevatorDownCommand());
         
         // Gantry forward and backward (D-pad Up and Down)
-        m_driverController.povUp().and(m_gantryForward.negate()) // Gantry must not be contacting the front limit switch
+        m_driverController.povUp().and(m_gantryForwardTrigger.negate()) // Gantry must not be contacting the front limit switch
             .whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryForward));
-        m_driverController.povDown().and(m_gantryBack.negate()) // Gantry must not be contacting the back limit switch
+        m_driverController.povDown().and(m_gantryBackTrigger.negate()) // Gantry must not be contacting the back limit switch
             .whileTrue(m_robotElevator.moveGantryCommand(ElevatorSetpoints.kGantryBackward));
         
         // Shooter out and in (Right and Left Triggers)
@@ -84,24 +93,33 @@ public class RobotContainer {
         m_driverController.leftTrigger().whileTrue(m_robotShooter.shooterInCommand());
         
         // Shooter open and close (Right and Left Bumpers)
-        m_driverController.rightBumper().whileTrue(m_robotShooter.jawOpenCommand());
-        m_driverController.leftBumper().whileTrue(m_robotShooter.jawCloseCommand());
+        m_driverController.rightBumper().and(m_jawAtMaxPosTrigger.negate()) // Jaw must not not be at the top
+            .whileTrue(m_robotShooter.jawOpenCommand());
+        m_driverController.leftBumper()
+            .whileTrue(m_robotShooter.jawCloseCommand());
         
         // Stop gantry movement (Gantry Limit Switches)
-        m_gantryForward.or(m_gantryBack).onTrue(m_robotElevator.runOnce(Commands::none));
+        m_gantryForwardTrigger.or(m_gantryBackTrigger)
+            .onTrue(m_robotElevator.runOnce(Commands::none));
 
-        m_elevatorBottom.onTrue(m_robotElevator.runOnce(Commands::none));
+        // Stop elevator movement (Elevator Limit Switch and Encoder)
+        m_elevatorTopTrigger.or(m_elevatorBottomTrigger)
+            .onTrue(m_robotElevator.runOnce(Commands::none));
+
+        // Stop Jaw movement (Jaw Encoder)
+        m_jawAtMaxPosTrigger.or(m_jawAtMinPosTrigger)
+            .onTrue(m_robotShooter.runOnce(Commands::none));
 
         // Reset encoder positions (Gantry Limit Switches)
-        m_gantryBack.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryBackward));
-        m_gantryForward.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryForward));
+        m_gantryBackTrigger.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryBackward));
+        m_gantryForwardTrigger.onTrue(m_robotElevator.resetGantryEncoder(ElevatorSetpoints.kGantryForward));
     }
 
     public Command getAutonomousCommand() {
         return Commands.sequence(
-            Commands.runOnce(() -> m_robotDrive.drive(-0.3, 0, 0, false), m_robotDrive),
+            Commands.runOnce(() -> m_robotDrive.drive(-0.3, 0, 0, true), m_robotDrive),
             Commands.waitSeconds(2.0),
-            Commands.runOnce(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive)
+            Commands.runOnce(() -> m_robotDrive.drive(0, 0, 0, true), m_robotDrive)
         );
         
     //     // Create config for trajectory

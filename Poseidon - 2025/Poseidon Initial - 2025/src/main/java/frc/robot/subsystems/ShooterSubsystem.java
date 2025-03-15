@@ -101,4 +101,12 @@ public class ShooterSubsystem extends SubsystemBase{
             () -> m_shooterMotor.set(ShooterConstants.kDefaultShooterOutSpeed),
             () -> m_shooterMotor.set(0.0));
     }
+
+    public boolean isJawAtMax() {
+        return m_jawEncoder.getPosition() > 1.8;
+    }
+
+    public boolean isJawAtMin() {
+        return m_jawEncoder.getPosition() < 0.05;
+    }
 }

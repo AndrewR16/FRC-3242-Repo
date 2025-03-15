@@ -124,4 +124,8 @@ public class ElevatorSubsystem extends SubsystemBase{
     public Boolean getElevatorBottomSwitch() {
         return !m_elevatorBottomLimitSwitch.get();
     }
+
+    public Boolean isElevatorAtMax() {
+        return m_liftEncoder.getPosition() > 7.7;
+    }
 }
